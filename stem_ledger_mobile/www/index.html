@@ -1727,6 +1727,96 @@ window.selectSchoolProfile = function(schoolName) {
     if (btn) btn.textContent = 'Download from Cloud';
   }
   
+function generateRadarChart(catCounts, totalItems) {
+  const size = 180;
+  const center = size / 2;
+  const radius = size / 2 - 25; 
+  const maxCount = Math.max(...catCounts.map(c => c.count), 10);
+  const steps = 4;
+  
+  let svg = `<svg viewBox="0 0 ${size} ${size}" width="160" height="160" style="overflow: visible; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));">`;
+  
+  const numCats = catCounts.length;
+  const angleStep = (Math.PI * 2) / numCats;
+  
+  // Draw grid (polygons for each step)
+  for (let i = 1; i <= steps; i++) {
+    const r = (radius / steps) * i;
+    let points = '';
+    for (let j = 0; j < numCats; j++) {
+      const angle = j * angleStep - Math.PI / 2;
+      const x = center + Math.cos(angle) * r;
+      const y = center + Math.sin(angle) * r;
+      points += `${x},${y} `;
+    }
+    const isLast = i === steps;
+    svg += `<polygon points="${points}" fill="${isLast ? 'rgba(0,0,0,0.02)' : 'none'}" stroke="var(--border)" stroke-width="${isLast ? 1.5 : 0.8}"/>`;
+    // Add tick label on the top axis (only on one axis)
+    if (i < steps) {
+        const tickVal = Math.round((maxCount / steps) * i);
+        svg += `<text x="${center + 3}" y="${center - r + 3}" font-size="7" font-family="var(--font-mono)" fill="var(--ink-muted)">${tickVal}</text>`;
+    }
+  }
+  
+  // Draw max tick label
+  svg += `<text x="${center + 3}" y="${center - radius + 3}" font-size="7" font-family="var(--font-mono)" fill="var(--ink-muted)">${maxCount}</text>`;
+  
+  // Draw axes
+  for (let j = 0; j < numCats; j++) {
+    const angle = j * angleStep - Math.PI / 2;
+    const x = center + Math.cos(angle) * radius;
+    const y = center + Math.sin(angle) * radius;
+    svg += `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="var(--border)" stroke-width="0.8"/>`;
+  }
+  
+  // Draw data polygon
+  let dataPoints = '';
+  catCounts.forEach((c, j) => {
+    const angle = j * angleStep - Math.PI / 2;
+    const val = c.count;
+    const r = (val / maxCount) * radius;
+    const x = center + Math.cos(angle) * r;
+    const y = center + Math.sin(angle) * r;
+    dataPoints += `${x},${y} `;
+  });
+  
+  // A subtle gradient fill for the radar
+  svg += `<defs>
+    <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="var(--it)" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>`;
+  
+  svg += `<polygon points="${dataPoints}" fill="url(#radarGrad)" stroke="var(--primary)" stroke-width="1.5"/>`;
+  
+  // Draw data dots and labels
+  catCounts.forEach((c, j) => {
+    const angle = j * angleStep - Math.PI / 2;
+    const val = c.count;
+    const cat = CATEGORIES[c.key];
+    
+    // Dot
+    const r = (val / maxCount) * radius;
+    const dx = center + Math.cos(angle) * r;
+    const dy = center + Math.sin(angle) * r;
+    svg += `<circle cx="${dx}" cy="${dy}" r="3.5" fill="${cat.color}" stroke="var(--surface)" stroke-width="1.5"/>`;
+    
+    // Label
+    const labelR = radius + 14;
+    const lx = center + Math.cos(angle) * labelR;
+    const ly = center + Math.sin(angle) * labelR;
+    
+    const textAnchor = Math.cos(angle) > 0.1 ? "start" : Math.cos(angle) < -0.1 ? "end" : "middle";
+    const baseline = Math.sin(angle) > 0.1 ? "hanging" : Math.sin(angle) < -0.1 ? "auto" : "middle";
+    
+    svg += `<text x="${lx}" y="${ly}" font-size="8.5" font-weight="700" fill="var(--ink)" text-anchor="${textAnchor}" dominant-baseline="${baseline}">${cat.short}</text>`;
+  });
+  
+  svg += `</svg>`;
+  return svg;
+}
+
 function dashboardHTML(){
   const totalItems = items.length;
   const totalQty = items.reduce((s,i)=>s+Number(i.quantity||0),0);
@@ -1820,19 +1910,16 @@ function dashboardHTML(){
     <div class="dash-grid">
       <div class="panel">
         <h3>Items by category</h3>
-        <div class="donut-row">
-          <div class="donut" style="background:conic-gradient(${gradient})">
-            <div class="donut-center">
-              <div class="num">${totalItems}</div>
-              <div class="lbl">Items</div>
-            </div>
+        <div class="donut-row" style="align-items: flex-start; justify-content: space-between;">
+          <div style="flex-shrink:0; display:flex; justify-content:center; align-items:center; min-width:160px; padding: 10px 0;">
+            ${generateRadarChart(catCounts, totalItems)}
           </div>
-          <div class="legend">
+          <div class="legend" style="flex:1; margin-top: 10px;">
             ${Object.entries(CATEGORIES).map(([k,c])=>`
-              <div class="legend-item clickable-row" data-action="dashboard-drilldown" data-type="category" data-category="${k}" style="padding:4px; border-radius:4px; margin-bottom:4px;">
+              <div class="legend-item clickable-row" data-action="dashboard-drilldown" data-type="category" data-category="${k}" style="padding:6px; border-radius:6px; margin-bottom:4px; border: 1px solid transparent; transition: all 0.2s;">
                 <span class="category-dot" style="background:${c.color}"></span>
-                <span class="legend-name">${c.label}</span>
-                <span class="legend-count">${items.filter(i=>i.category===k).length}</span>
+                <span class="legend-name" style="font-weight: 500;">${c.label}</span>
+                <span class="legend-count" style="font-weight: 600; font-size: 14px;">${items.filter(i=>i.category===k).length}</span>
               </div>`).join('')}
           </div>
         </div>
