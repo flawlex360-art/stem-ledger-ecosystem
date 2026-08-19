@@ -1,0 +1,9 @@
+{
+  "appId": "com.flawlex.stemledger.master",
+  "appName": "STEM Master Portal",
+  "webDir": "www",
+  "server": {
+    "url": "https://kpando-stem-ledger.vercel.app/master/",
+    "cleartext": true
+  }
+}

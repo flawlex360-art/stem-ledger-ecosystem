@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/master/(.*)",
+      "dest": "/stem_ledger_master_portal/www/"
+    },
+    {
+      "src": "/master",
+      "dest": "/stem_ledger_master_portal/www/index.html"
+    },
+    {
+      "src": "/school/(.*)",
+      "dest": "/stem_ledger_mobile/www/"
+    },
+    {
+      "src": "/school",
+      "dest": "/stem_ledger_mobile/www/index.html"
+    },
+    {
+      "src": "/community/(.*)",
+      "dest": "/kpando_stem_community/www/"
+    },
+    {
+      "src": "/community",
+      "dest": "/kpando_stem_community/www/index.html"
+    }
+  ]
+}

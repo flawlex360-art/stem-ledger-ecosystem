@@ -1,0 +1,9 @@
+{
+  "appId": "com.flawlex.stemledger.community",
+  "appName": "Kpando STEM Community",
+  "webDir": "www",
+  "server": {
+    "url": "https://kpando-stem-ledger.vercel.app/community/",
+    "cleartext": true
+  }
+}

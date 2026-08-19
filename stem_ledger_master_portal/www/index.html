@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STEM Ledger - District Master Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+*{ box-sizing: border-box; }
+html, body{ margin:0; padding:0; overflow-x: hidden; }
+body.convo-open { overflow: hidden !important; height: 100vh !important; }
+
+:root{
+  --bg:#F2F4F1;
+  --surface:#FFFFFF;
+  --surface-2:#E8ECE7;
+  --ink:#202C26;
+  --ink-soft:#69766D;
+  --border:#D8DFD8;
+  --accent:#1C2D5E;
+  --accent-soft:#E8EDF6;
+  --danger:#C1453A;
+  --danger-soft:#F8E4E1;
+  --radius:10px;
+  --radius-sm:6px;
+  --shadow:0 1px 2px rgba(32,44,38,0.06), 0 6px 16px rgba(32,44,38,0.05);
+  --font-display:'Roboto', sans-serif;
+  --font-body:'Roboto', sans-serif;
+}
+
+body{
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Layout ---------- */
+.app{ display:flex; min-height:100vh; }
+
+.sidebar{
+  width:268px; flex-shrink:0; background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:28px;
+  padding:24px 20px; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:40;
+}
+.main{ flex:1; padding:28px 36px 60px; min-width:0; }
+
+/* ---------- Brand ---------- */
+.brand{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.brand-title{ font-family:var(--font-display); font-weight:700; font-size:17px; color:var(--accent); letter-spacing:-0.01em; }
+.brand-sub{ font-size:12px; color:var(--ink-soft); }
+
+/* ---------- Nav ---------- */
+.nav{ display:flex; flex-direction:column; gap:4px; }
+.nav-item{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border-radius:var(--radius-sm);
+  border:none; background:transparent; cursor:pointer;
+  font-family:var(--font-body); font-size:14px; font-weight:500;
+  color:var(--ink-soft); text-align:left; width:100%;
+}
+.nav-item:hover{ background:var(--surface-2); color:var(--ink); }
+.nav-item.active{ background:var(--accent-soft); color:var(--accent); font-weight:600; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:var(--font-body); font-size:13px; font-weight:600;
+  padding:9px 14px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface); color:var(--ink); cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  transition:background .15s ease, border-color .15s ease, color .15s ease;
+}
+.btn:hover{ background:var(--surface-2); }
+.btn-primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-primary:hover{ background:#152248; }
+
+/* ---------- Page header ---------- */
+.page-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:24px; flex-wrap:wrap; }
+.page-title{ font-family:var(--font-display); font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-0.01em; color:var(--accent); }
+.page-subtitle{ color:var(--ink-soft); font-size:14px; margin:0; }
+
+/* ---------- Stat cards ---------- */
+.stat-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; margin-bottom:28px; }
+.stat-card{ display:flex; flex-direction:column; justify-content:space-between; height:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.stat-card.clickable{ cursor:pointer; }
+.stat-card.clickable:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.12); }
+.stat-card .stat-label{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600; }
+.stat-card .stat-value{ font-family:var(--font-display); font-size:24px; font-weight:700; }
+
+/* ---------- Table ---------- */
+.table-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:13px; text-align:left; }
+thead th{
+  padding:12px 14px; background:var(--surface-2); font-size:11px;
+  text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+tbody td{ padding:12px 14px; border-top:1px solid var(--border); vertical-align:middle; }
+tbody tr:hover{ background:#F8F9F8; }
+
+.badge{ display:inline-flex; align-items:center; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap; }
+.badge.good{ background:#E1EFE6; color:#1F5C40; }
+.badge.warn{ background:#FBEFDD; color:#92521A; }
+.badge.bad{ background:#F8E1DF; color:#A8332A; }
+
+.school-name{ font-weight:700; font-size:14px; color:var(--accent); }
+.school-email{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+
+/* ---------- Form / Inputs ---------- */
+.field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.field label{ font-size:12px; font-weight:600; color:var(--ink-soft); text-align:left; }
+.field input, .field select{
+  padding:9px 11px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  font-family:var(--font-body); font-size:13px; background:var(--bg); color:var(--ink);
+  width:100%;
+}
+.field input:focus, .field select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+/* ---------- Glass Modal ---------- */
+.glass-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.glass-overlay:not([hidden]) { opacity: 1; pointer-events: auto; }
+.glass-modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); width: 100%; max-width: 700px;
+  max-height: 85vh; overflow-y: auto; padding: 24px; transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.glass-overlay:not([hidden]) .glass-modal { transform: translateY(0); }
+.close-btn{ border:none; background:transparent; font-size:22px; cursor:pointer; color:var(--ink-soft); line-height:1; }
+
+/* ---------- Bottom Navigation ---------- */
+.bottom-nav { display:none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width:880px){
+  body { padding-bottom: 80px; }
+  .sidebar{ display:none !important; }
+  .main{ padding:15px; }
+  .page-title { font-size: 22px; }
+  
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface);
+    display: flex; justify-content: space-around; padding: 12px 0 20px;
+    border-top: 1px solid var(--border); z-index: 400; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  }
+  .bottom-nav-btn {
+    background: none; border: none; font-size: 12px; font-weight: 600; color: var(--ink-soft);
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 8px;
+    position: relative; cursor: pointer;
+  }
+  .bottom-nav-btn.active { color: var(--accent); background: var(--accent-soft); }
+  .bottom-nav-btn svg { width: 20px; height: 20px; fill: currentColor; }
+}
+
+/* ========== CHAT UI — WhatsApp-style ========== */
+
+/* --- Recent Chats List (main chat view) --- */
+.chat-list-view {
+  display: flex; flex-direction: column;
+  background: transparent;
+  margin: 0;
+  overflow: visible;
+}
+.chat-list-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.chat-list-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--ink-soft); text-align: center; padding: 40px 20px;
+}
+.chat-list-empty svg { width: 56px; height: 56px; fill: var(--border); margin-bottom: 12px; }
+.chat-list-empty p { font-size: 13px; margin: 0; }
+
+/* Individual recent-chat row */
+.recent-chat-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  transition: background 0.15s;
+}
+.recent-chat-row:last-child {
+  border-bottom: none;
+}
+.recent-chat-row:active { background: var(--surface-2); }
+.chat-avatar {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: white;
+}
+.recent-chat-info { flex: 1; min-width: 0; }
+.recent-chat-name { font-weight: 600; font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-chat-snippet { font-size: 12px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.recent-chat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.recent-chat-time { font-size: 10px; color: var(--ink-soft); }
+.recent-chat-badge {
+  background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; padding: 0 5px;
+}
+
+/* --- Full-screen Conversation Overlay --- */
+.convo-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 80px; z-index: 300;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.28s;
+  visibility: hidden;
+  overflow: hidden;
+}
+.convo-overlay.open { transform: translateX(0); visibility: visible; transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+.convo-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--accent); color: white;
+  flex-shrink: 0;
+}
+.convo-back-btn {
+  background: none; border: none; color: white; cursor: pointer;
+  padding: 4px; display: flex; align-items: center;
+}
+.convo-back-btn svg { width: 22px; height: 22px; fill: white; }
+.convo-header-name { font-weight: 600; font-size: 15px; flex: 1; }
+.convo-header-sub { font-size: 11px; opacity: 0.8; }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(180deg, #eef1f5 0%, #e8ecf0 100%);
+}
+.chat-bubble {
+  max-width: 82%; padding: 8px 12px; border-radius: 14px;
+  position: relative; word-wrap: break-word;
+  font-size: 13px; line-height: 1.45;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+}
+.chat-bubble.mine {
+  align-self: flex-end;
+  background: var(--accent); color: white;
+  border-bottom-right-radius: 4px;
+}
+.chat-bubble.theirs {
+  align-self: flex-start;
+  background: white; color: var(--ink);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-bottom-left-radius: 4px;
+}
+.chat-sender { font-size: 10px; font-weight: 700; margin-bottom: 2px; }
+.chat-bubble.mine .chat-sender { color: rgba(255,255,255,0.85); text-align: right; }
+.chat-bubble.theirs .chat-sender { color: var(--accent); }
+.chat-time { font-size: 13px; opacity: 0.65; margin-top: 3px; text-align: right; }
+
+.chat-input-area {
+  padding: 8px 12px; background: white;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px; align-items: center;
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; background: var(--surface-2); border: none;
+  padding: 10px 14px; border-radius: 22px; outline: none; font-size: 13px;
+}
+.chat-send-btn {
+  background: var(--accent); color: white; border: none; border-radius: 50%;
+  width: 38px; height: 38px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.1s;
+}
+.chat-send-btn:active { transform: scale(0.92); }
+.chat-send-btn svg { width: 18px; height: 18px; fill: white; margin-left: 1px; }
+
+/* --- New-Message bottom sheet (school picker) --- */
+.nm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s; display: flex; align-items: flex-end;
+}
+.nm-overlay.show { opacity: 1; pointer-events: auto; }
+.nm-sheet {
+  background: white; width: 100%; max-height: 75vh;
+  border-radius: 18px 18px 0 0; padding: 0;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex; flex-direction: column;
+}
+.nm-overlay.show .nm-sheet { transform: translateY(0); }
+.nm-sheet-header {
+  padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.nm-sheet-header h3 { margin: 0; font-size: 16px; font-family: var(--font-display); }
+.nm-sheet-close {
+  background: var(--surface-2); border: none; width: 28px; height: 28px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; color: var(--ink-soft);
+}
+.nm-sheet-list { overflow-y: auto; flex: 1; }
+.nm-school-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; cursor: pointer;
+  border-bottom: 1px solid var(--surface-2);
+  transition: background 0.15s;
+}
+.nm-school-row:active { background: var(--surface-2); }
+.nm-school-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+.nm-school-email { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+
+/* Notification badges and toasts */
+.badge-icon { position: absolute; top: 0px; right: 8px; background: var(--danger); color: white; font-size: 9px; font-weight: bold; border-radius: 10px; padding: 2px 5px; min-width: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toast-notification {
+  position: fixed; top: -100px; left: 50%; transform: translate3d(-50%, 0, 0);
+  width: calc(100% - 32px); max-width: 400px; background: var(--surface); color: var(--ink);
+  padding: 12px 16px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 12px; z-index: 10000;
+  transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;
+  border: 1px solid var(--border); box-sizing: border-box;
+}
+.toast-notification.show { top: 20px; }
+.modal-overlay, .sidebar-wrapper, .bottom-nav-bar, .sheet-overlay, .overlay-sheet {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+.toast-notification {
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* Splash Screen styling */
+.page-fade-in {
+  animation: premiumEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+@keyframes premiumEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(45px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+#splashScreen {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: url('splash_bg.jpg') no-repeat center center/cover;
+  z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; transition: opacity 0.5s ease;
+}
+#splashScreen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1;
+}
+.splash-card {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: calc(100% - 40px); max-width: 320px;
+  padding: 32px 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.splash-title { font-size: 28px; font-weight: 700; margin-bottom: 15px; font-family: var(--font-display); color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.splash-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.splash-progress-fill { width: 0%; height: 100%; background: #ffffff; transition: width 0.1s linear; }
+.splash-footer { margin-top: 24px; font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
+</style>
+
+<!-- Appwrite Web SDK & Configuration -->
+<script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+<script src="appwrite_config.js"></script>
+</head>
+<body>
+
+<div id="splashScreen">
+  <div class="splash-card">
+    <div class="splash-title">STEM Master Portal</div>
+    <div class="splash-progress-bar"><div class="splash-progress-fill" id="splashPercent"></div></div>
+    <div class="splash-footer">created by Kpando Anglican STEM Club</div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar" style="display:none;">
+    <div class="brand">
+      <img src="b_generate_a_simple_bu.jpeg" alt="Logo" style="width: 100%; max-width: 220px; height: auto; border-radius: var(--radius-sm);" onerror="this.style.display='none'">
+      <div>
+        <div class="brand-title" style="font-size:16px;color:#162464; margin-top: 4px;">District Master</div>
+        <div class="brand-sub" style="font-size:11px;font-weight:600;color:#777;letter-spacing:0.04em">Administration</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item" data-action="set-view" data-view="dashboard">Dashboard</button>
+      <button class="nav-item" data-action="set-view" data-view="chat">
+        Messages
+        <span class="chat-badge-counter" style="display:none; margin-left:auto; background:var(--danger); color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px;">0</span>
+      </button>
+      <button class="nav-item" data-action="set-view" data-view="approvals">
+        Approvals
+        <span class="approvals-badge-counter" style="display:none; margin-left:auto; background:var(--danger); color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px;">0</span>
+      </button>
+      <button class="nav-item" data-action="set-view" data-view="manageSchools">Manage Schools</button>
+      <button class="nav-item" data-action="set-view" data-view="settings">Settings</button>
+    </nav>
+    
+    <div class="sidebar-section" style="margin-top:auto;">
+      <button class="btn btn-ghost" data-action="logout" style="color:var(--danger); border:none; background:transparent; width:100%; text-align:left; font-weight:600; cursor:pointer;">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main" id="mainView" style="display:none;">
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="bottom-nav" style="display:none;">
+  <button class="bottom-nav-btn" data-action="set-view" data-view="dashboard">
+    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Dashboard
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="chat">
+    <span class="badge-icon chat-badge-counter" style="display:none">0</span>
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+    Messages
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="approvals">
+    <span class="badge-icon approvals-badge-counter" style="display:none">0</span>
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    Approvals
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="manageSchools">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    Schools
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="settings">
+    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+    Settings
+  </button>
+</div>
+
+<!-- Broken/Lost items overview modal -->
+<div class="glass-overlay" id="drilldownModal" hidden>
+  <div class="glass-modal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:var(--danger);">Broken / Lost Items Overview</h2>
+      <button class="close-btn" onclick="document.getElementById('drilldownModal').hidden=true;">&times;</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>School</th>
+            <th>Item Name</th>
+            <th>Asset Tag</th>
+            <th>Status</th>
+            <th>Qty</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        <tbody id="drilldownBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- District Requests Drilldown Modal -->
+<div class="glass-overlay" id="requestsDrilldownModal" hidden>
+  <div class="glass-modal" style="max-width:500px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0; font-family:var(--font-display); font-size:18px; font-weight:700;" id="requestsDrilldownTitle">Sent Requests</h2>
+      <button class="close-btn" onclick="document.getElementById('requestsDrilldownModal').hidden=true;">&times;</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding-right:4px;" id="requestsDrilldownBody">
+      <!-- Rendered dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- District Total Value Breakdown Modal -->
+<div class="glass-overlay" id="valueBreakdownModal" hidden>
+  <div class="glass-modal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:#7B1FA2;">District Total Value Breakdown</h2>
+      <button class="close-btn" onclick="document.getElementById('valueBreakdownModal').hidden=true;">&times;</button>
+    </div>
+    <div class="table-wrap">
+      <table style="width:100%; table-layout:fixed;">
+        <thead>
+          <tr>
+            <th style="width:50%; padding:10px 8px;">School</th>
+            <th style="width:22%; padding:10px 8px; text-align:right;">Total Assets</th>
+            <th style="width:28%; padding:10px 8px; text-align:right;">Estimated Value</th>
+          </tr>
+        </thead>
+        <tbody id="valueBreakdownBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Active Schools List Modal -->
+<div class="glass-overlay" id="activeSchoolsModal" hidden>
+  <div class="glass-modal" style="max-width:450px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:var(--accent);">Active Registered Schools</h2>
+      <button class="close-btn" onclick="document.getElementById('activeSchoolsModal').hidden=true;">&times;</button>
+    </div>
+    <div class="table-wrap">
+      <table style="width:100%; table-layout:fixed;">
+        <thead>
+          <tr>
+            <th style="width:100%; padding:12px 8px;">School Name</th>
+          </tr>
+        </thead>
+        <tbody id="activeSchoolsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Conversation overlay (full-screen) -->
+<div class="convo-overlay" id="convoOverlay">
+  <div class="convo-header">
+    <button class="convo-back-btn" onclick="closeConversation()">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </button>
+    <div class="chat-avatar" id="convoAvatar" style="width:34px;height:34px;font-size:13px;"></div>
+    <div style="flex:1;">
+      <div class="convo-header-name" id="convoName"></div>
+    </div>
+  </div>
+  <div class="chat-messages" id="convoMessages"></div>
+  <form class="chat-input-area" id="convoForm" onsubmit="handleChatSubmit(event)">
+    <input type="text" class="chat-input" id="convoInput" placeholder="Type a message…" required autocomplete="off">
+    <button type="submit" class="chat-send-btn">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </form>
+</div>
+
+<!-- New Message bottom sheet -->
+<div class="nm-overlay" id="nmOverlay" onclick="if(event.target===this) closeNewMessageSheet()">
+  <div class="nm-sheet">
+    <div class="nm-sheet-header">
+      <h3>Select a school</h3>
+      <button class="nm-sheet-close" onclick="closeNewMessageSheet()">&times;</button>
+    </div>
+    <div class="nm-sheet-list" id="nmSchoolList">
+      <div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px;">Loading schools…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // ==========================================
+  // CONFIG & STATE
+  // ==========================================
+  const appwriteCfg = window.APPWRITE_CONFIG || {
+    ENDPOINT: 'https://cloud.appwrite.io/v1',
+    PROJECT_ID: '6a8597db0023283e1bde',
+    DATABASE_ID: 'stem_ledger_db',
+    COLLECTIONS: {
+      SCHOOLS: 'schools',
+      REQUESTS: 'equipment_requests',
+      MESSAGES: 'messages',
+      REVOKED: 'revoked_schools'
+    },
+    BUCKET_ID: 'stem_assets'
+  };
+
+  const { Client, Account, Databases, Storage, ID, Query } = window.Appwrite || {};
+  let client = null;
+  let account = null;
+  let databases = null;
+  let storage = null;
+
+  if (window.Appwrite) {
+    client = new Client().setEndpoint(appwriteCfg.ENDPOINT).setProject(appwriteCfg.PROJECT_ID);
+    account = new Account(client);
+    databases = new Databases(client);
+    storage = new Storage(client);
+  }
+
+  function setupBackButtonHandler() {
+    try {
+      if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.App) {
+        const { App } = Capacitor.Plugins;
+        let lastBackPress = 0;
+
+        App.addListener('backButton', (data) => {
+          const convoOverlay = document.getElementById('convoOverlay');
+          if (convoOverlay && convoOverlay.classList.contains('open')) {
+            if (typeof window.closeConversation === 'function') {
+              window.closeConversation();
+            } else {
+              convoOverlay.classList.remove('open');
+              document.body.classList.remove('convo-open');
+            }
+            return;
+          }
+
+          const nmOverlay = document.getElementById('nmOverlay');
+          if (nmOverlay && nmOverlay.classList.contains('show')) {
+            if (typeof window.closeNewMessageSheet === 'function') {
+              window.closeNewMessageSheet();
+            } else {
+              nmOverlay.classList.remove('show');
+            }
+            return;
+          }
+
+          const drilldownModal = document.getElementById('drilldownModal');
+          if (drilldownModal && !drilldownModal.hidden) {
+            drilldownModal.hidden = true;
+            return;
+          }
+
+          const valueBreakdownModal = document.getElementById('valueBreakdownModal');
+          if (valueBreakdownModal && !valueBreakdownModal.hidden) {
+            valueBreakdownModal.hidden = true;
+            return;
+          }
+
+          const activeSchoolsModal = document.getElementById('activeSchoolsModal');
+          if (activeSchoolsModal && !activeSchoolsModal.hidden) {
+            activeSchoolsModal.hidden = true;
+            return;
+          }
+
+          if (appSettings && appSettings.isAuthenticated && currentView !== 'dashboard') {
+            const dashBtn = document.querySelector('[data-view="dashboard"]');
+            if (dashBtn) {
+              dashBtn.click();
+            } else {
+              currentView = 'dashboard';
+              if (typeof renderView === 'function') renderView();
+            }
+            return;
+          }
+
+          const now = Date.now();
+          if (now - lastBackPress < 2000) {
+            App.exitApp();
+          } else {
+            lastBackPress = now;
+            if (typeof window.showToast === 'function') {
+              window.showToast("System", "Press back again to exit");
+            } else {
+              alert("Press back again to exit");
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Error setting up back button handler:", e);
+    }
+  }
+  setupBackButtonHandler();
+
+  function setupAppStateChangeListener() {
+    try {
+      if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.App) {
+        const { App } = Capacitor.Plugins;
+        App.addListener('appStateChange', (state) => {
+          if (state.isActive) {
+            console.log("App became active. Refreshing Appwrite data...");
+            if (typeof fetchSchools === 'function') fetchSchools();
+            if (typeof fetchRequests === 'function') fetchRequests();
+            if (typeof fetchChatMessages === 'function') fetchChatMessages();
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Error setting up app state change listener:", e);
+    }
+  }
+  setupAppStateChangeListener();
+
+  window.fcmTokenValue = null;
+
+  function saveFCMTokenToDatabase(tokenValue) {
+    console.log("Push token registered:", tokenValue);
+  }
+
+  function setupPushNotifications() {
+    try {
+      if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.PushNotifications) {
+        const { PushNotifications } = Capacitor.Plugins;
+
+        if (Capacitor.getPlatform() === 'android') {
+          PushNotifications.createChannel({
+            id: 'default',
+            name: 'Default Channel',
+            description: 'Default notification channel',
+            importance: 3,
+            visibility: 1,
+            sound: 'beep.wav'
+          }).then(() => {
+            console.log("Default push notification channel created/updated.");
+          }).catch(err => {
+            console.error("Failed to create notification channel:", err);
+          });
+        }
+
+        PushNotifications.requestPermissions().then((result) => {
+          if (result.receive === 'granted') {
+            PushNotifications.register();
+          } else {
+            console.warn("Push notification permission denied.");
+          }
+        });
+
+        PushNotifications.addListener('registration', (token) => {
+          console.log("Push registration success, token: " + token.value);
+          window.fcmTokenValue = token.value;
+          saveFCMTokenToDatabase(token.value);
+        });
+
+        PushNotifications.addListener('registrationError', (error) => {
+          console.error("Push registration error: " + error.error);
+        });
+
+        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+          console.log("Push received: ", notification);
+          if (typeof showToast === 'function') {
+            showToast(notification.title || "Notification", notification.body || "");
+          } else {
+            alert((notification.title || "Notification") + "\n" + (notification.body || ""));
+          }
+          if (typeof fetchSchools === 'function') fetchSchools();
+          if (typeof fetchRequests === 'function') fetchRequests();
+          if (typeof fetchChatMessages === 'function') fetchChatMessages();
+        });
+
+        PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+          console.log("Push action performed: ", action);
+          const data = action.notification.data;
+          if (data && data.targetView) {
+            if (typeof setView === 'function') {
+              setView(data.targetView);
+              if (data.targetView === 'chat' && data.chatRecipient) {
+                setTimeout(() => {
+                  if (typeof openConversation === 'function') {
+                    openConversation(data.chatRecipient);
+                  }
+                }, 300);
+              }
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Error setting up push notifications:", e);
+    }
+  }
+
+  let appSettings = JSON.parse(localStorage.getItem('stem_master_settings')) || { isAuthenticated: false, email: '' };
+  let currentView = 'login';
+  let schoolsData = [];
+  let districtBrokenLostItems = [];
+  
+  // Chat state
+  let chatMessages = [];
+  let allDistrictSchools = [];
+  let currentChatRecipient = null;
+  let unreadCounts = {};
+  let chatUnsubscribe = null;
+  let recentChats = JSON.parse(localStorage.getItem('stem_master_recent_chats') || '[]');
+  
+  // Approvals state
+  let districtRequests = [];
+  let approvalsInitialLoad = true;
+  let approvalsUnsubscribe = null;
+
+  function saveSettings() {
+    localStorage.setItem('stem_master_settings', JSON.stringify(appSettings));
+  }
+
+  function saveRecentChats() {
+    localStorage.setItem('stem_master_recent_chats', JSON.stringify(recentChats));
+  }
+
+  window.sendFCMNotification = function(targetEmail, title, body, targetView, extraData) {
+    console.log(`[Notification] To: ${targetEmail}, Title: ${title}, Body: ${body}`);
+    try {
+      if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.LocalNotifications) {
+        Capacitor.Plugins.LocalNotifications.schedule({
+          notifications: [{
+            title: title,
+            body: body,
+            id: Math.floor(Math.random() * 100000),
+            schedule: { at: new Date(Date.now() + 500) },
+            extra: { targetView: targetView || 'dashboard', ...extraData }
+          }]
+        });
+      }
+    } catch(e) {
+      console.warn("Local notification error:", e);
+    }
+  };
+
+  function addToRecentChats(email, name) {
+    recentChats = recentChats.filter(r => r.email !== email);
+    recentChats.unshift({ email, name });
+    if (recentChats.length > 30) recentChats.length = 30;
+    saveRecentChats();
+  }
+
+  function getUnreadTotal() {
+    return Object.values(unreadCounts).reduce((a, b) => a + b, 0);
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // Use Cedi currency formatter
+  function fmtMoney(n) {
+    return 'GH\u20B5 ' + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function getInitials(name) {
+    if (name === 'Broadcast (All Schools)') return '📢';
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    return parts.map(p => p[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function getAvatarColor(email) {
+    if (email === 'broadcast') return '#1976D2';
+    const colors = ['#1C2D5E','#2D6A4F','#C9622A','#6B4FA0','#1D6E8A','#8B5E3C','#A0436B','#2E7D32'];
+    let hash = 0;
+    for (let i = 0; i < (email||'').length; i++) hash = ((hash << 5) - hash) + email.charCodeAt(i);
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  function timeAgo(date) {
+    if (!date) return 'Never';
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " yrs ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " mos ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hrs ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " mins ago";
+    return Math.floor(seconds) + " secs ago";
+  }
+
+  // ==========================================
+  // VIEW RENDERING
+  // ==========================================
+  function render() {
+    renderSidebar();
+    renderView();
+    updateChatBadge();
+  }
+
+  function renderSidebar() {
+    document.querySelectorAll('.nav-item, .bottom-nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.view === currentView);
+    });
+  }
+
+  function renderView() {
+    window.scrollTo(0, 0);
+    const root = document.getElementById('view');
+    root.classList.remove('page-fade-in');
+    void root.offsetWidth; // trigger reflow
+    root.classList.add('page-fade-in');
+
+    const sidebar = document.getElementById('sidebar');
+    const mainView = document.getElementById('mainView');
+    const bottomNav = document.querySelector('.bottom-nav');
+
+    const isAuthView = (currentView === 'login');
+    if (sidebar) sidebar.style.display = isAuthView ? 'none' : 'flex';
+    if (mainView) mainView.style.display = 'block';
+    if (bottomNav) bottomNav.style.display = isAuthView ? 'none' : 'flex';
+
+    if (currentView === 'dashboard') {
+      root.innerHTML = dashboardHTML();
+    } else if (currentView === 'chat') {
+      root.innerHTML = chatListViewHTML();
+    } else if (currentView === 'approvals') {
+      root.innerHTML = approvalsHTML();
+      renderApprovalsDashboard();
+    } else if (currentView === 'manageSchools') {
+      root.innerHTML = manageSchoolsHTML();
+    } else if (currentView === 'settings') {
+      root.innerHTML = settingsHTML();
+    } else {
+      root.innerHTML = loginHTML();
+    }
+  }
+
+  // ==========================================
+  // VIEW MARKUP GENERATORS
+  // ==========================================
+  window.togglePassword = function(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+          input.type = 'text';
+          icon.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.28 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>';
+      } else {
+          input.type = 'password';
+          icon.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+      }
+  };
+
+  function loginHTML() {
+    return `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:20px; background: url('login_bg.jpg') no-repeat center center/cover; position: relative; margin: -28px -36px -60px;">
+        <!-- Backdrop overlay to darken/soften the image slightly -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.45); z-index: 1;"></div>
+        
+        <div style="position: relative; z-index: 2; width: 100%; max-width: 360px; padding: 32px 28px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); color: #ffffff; text-align: center;">
+          
+          <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 8px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-family: var(--font-display);">STEM Master</h1>
+            <p style="color: rgba(255, 255, 255, 0.85); margin: 0; font-size: 14px;">District Coordinator Control & Administration</p>
+          </div>
+          
+          <form id="loginForm" style="display: flex; flex-direction: column; gap: 18px; text-align: left;">
+            <div class="field" style="display: flex; flex-direction: column; gap: 6px; background: transparent; border: none; box-shadow: none; padding: 0; margin: 0;">
+              <label style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9);">Coordinator Email Address</label>
+              <input type="email" id="loginEmail" required placeholder="e.g. coordinator@district.edu" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='rgba(255, 255, 255, 0.6)'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.2)'">
+            </div>
+            <div class="field" style="display: flex; flex-direction: column; gap: 6px; position: relative; background: transparent; border: none; box-shadow: none; padding: 0; margin: 0;">
+              <label style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9);">Password</label>
+              <input type="password" id="loginPassword" required placeholder="Enter password" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px; padding-right: 40px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='rgba(255, 255, 255, 0.6)'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.2)'">
+              <button type="button" class="pwd-toggle" id="toggleLoginPwd" onclick="togglePassword('loginPassword', 'toggleLoginPwd')" style="position: absolute; right: 8px; top: 32px; background: none; border: none; color: rgba(255, 255, 255, 0.7); cursor: pointer; padding: 4px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              </button>
+            </div>
+            <button type="submit" class="btn primary" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 8px; background: #ffffff; color: #1c2d5e; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='#ffffff'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Sign In to Portal</button>
+            <div id="loginError" style="color: #ff8a80; font-size: 13px; text-align: center; margin-top: 8px; display: none;">Login failed</div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  function dashboardHTML() {
+    let totalSchools = schoolsData.length;
+    let totalQty = schoolsData.reduce((s, d) => s + d.qty, 0);
+    let totalValue = schoolsData.reduce((s, d) => s + d.value, 0);
+    let totalBrokenLost = schoolsData.reduce((s, d) => s + d.brokenLost, 0);
+
+    let rows = schoolsData.map(d => {
+      let syncBadge = '<span class="badge bad">Offline</span>';
+      if (d.lastSync) {
+        const hoursAgo = (new Date() - d.lastSync) / (1000 * 60 * 60);
+        if (hoursAgo < 24) syncBadge = '<span class="badge good">Online</span>';
+        else if (hoursAgo < 72) syncBadge = '<span class="badge warn">Stale</span>';
+      }
+
+      return `
+        <tr>
+          <td>
+            <div class="school-name">${escapeHtml(d.name)}</div>
+            <div class="school-email">${escapeHtml(d.email)}</div>
+          </td>
+          <td style="font-family:var(--font-mono); font-weight:600;">${d.qty.toLocaleString()}</td>
+          <td style="color:#1F5C40; font-weight:600;">${fmtMoney(d.value)}</td>
+          <td style="color: ${d.brokenLost > 0 ? 'var(--danger)' : 'var(--ink-soft)'}; font-weight:600;">${d.brokenLost}</td>
+          <td style="color:var(--ink-soft); font-size:12px;">${timeAgo(d.lastSync)}</td>
+          <td>${syncBadge}</td>
+        </tr>
+      `;
+    }).join('');
+
+    if (schoolsData.length === 0) {
+      rows = `<tr><td colspan="6" style="text-align:center; color:var(--ink-soft); padding:30px;">No school sync profiles found in the database.</td></tr>`;
+    }
+
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">District Master Dashboard</h1>
+        </div>
+        <div class="stat-card clickable" style="border-top: 4px solid #7B1FA2;" onclick="window.openValueBreakdown()">
+          <div class="stat-label">District Total Value</div>
+          <div class="stat-value" style="color:#7B1FA2;">${fmtMoney(totalValue)}</div>
+          <div style="font-size:11px; color:var(--ink-soft); margin-top:6px;">Click to view breakdown ➔</div>
+        </div>
+        <div class="stat-card clickable" style="border-top: 4px solid var(--danger);" onclick="window.openDrilldown()">
+          <div class="stat-label">Broken/Lost Items</div>
+          <div class="stat-value" style="color:var(--danger);">${totalBrokenLost}</div>
+          <div style="font-size:11px; color:var(--ink-soft); margin-top:6px;">Click to view details ➔</div>
+        </div>
+      </div>
+
+      <h2 style="font-family:var(--font-display); font-size:18px; margin-bottom:16px; font-weight:700;">Registered Schools</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>School & Email</th>
+              <th>Total Assets</th>
+              <th>Est. Value</th>
+              <th>Broken/Lost</th>
+              <th>Last Synced</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function settingsHTML() {
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Master Settings</h1>
+          <p class="page-subtitle">Portal Administration</p>
+        </div>
+      </div>
+      <div style="max-width:400px; margin:24px auto;">
+        <div style="background:var(--surface); padding:24px; border-radius:12px; border:1px solid var(--border);">
+          <div style="text-align:center; margin-bottom: 20px;">
+            <svg style="width:48px; height:48px; fill:var(--accent);" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+            <h3 style="margin:8px 0 4px 0; color:var(--ink);">Appwrite Cloud Backend</h3>
+            <p style="font-size:12px; color:var(--ink-soft); margin:0;">Live connection to district databases and storage.</p>
+          </div>
+          
+          <h3 style="margin:24px 0 12px 0; padding-top:24px; border-top:1px solid var(--border);">Coordinator Account</h3>
+          <p style="font-size:13px; color:var(--ink-soft); margin-bottom:12px;">Logged in as: <strong>${escapeHtml(appSettings.email)}</strong></p>
+          <button class="btn btn-ghost" data-action="logout" style="width:100%; color:var(--danger); border:1px solid var(--danger-soft); background:transparent; font-weight:600; padding:10px; cursor:pointer;">Log Out Device</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // DRILLDOWN MODAL
+  // ==========================================
+  window.openDrilldown = function() {
+    let rows = '';
+    if (districtBrokenLostItems.length === 0) {
+      rows = `<tr><td colspan="6" style="text-align:center; color:var(--ink-soft); padding:32px;">No broken or lost items in the entire district!</td></tr>`;
+    } else {
+      districtBrokenLostItems.sort((a,b) => a.schoolName.localeCompare(b.schoolName)).forEach(i => {
+        rows += `
+          <tr>
+            <td style="font-weight:600; color:var(--accent);">${escapeHtml(i.schoolName)}</td>
+            <td style="font-weight:500;">${escapeHtml(i.name || 'Unknown Item')}</td>
+            <td style="font-family:var(--font-mono); font-size:12px;">${escapeHtml(i.assetTag || 'N/A')}</td>
+            <td><span class="badge bad">${escapeHtml(i.displayStatus)}</span></td>
+            <td style="font-family:var(--font-mono);">${i.blQuantity}</td>
+            <td>${fmtMoney(Number(i.blQuantity)*Number(i.cost||0))}</td>
+          </tr>
+        `;
+      });
+    }
+    document.getElementById('drilldownBody').innerHTML = rows;
+    document.getElementById('drilldownModal').hidden = false;
+  };
+
+  window.openValueBreakdown = function() {
+    let rows = '';
+    if (schoolsData.length === 0) {
+      rows = `<tr><td colspan="3" style="text-align:center; color:var(--ink-soft); padding:32px;">No registered schools found!</td></tr>`;
+    } else {
+      [...schoolsData].sort((a,b) => b.value - a.value).forEach(s => {
+        rows += `
+          <tr>
+            <td style="font-weight:600; color:var(--accent); width:50%; padding:10px 8px; word-break:break-word; white-space:normal;">${escapeHtml(s.name)}</td>
+            <td style="font-family:var(--font-mono); font-weight:500; width:22%; padding:10px 8px; text-align:right;">${s.qty.toLocaleString()}</td>
+            <td style="color:#1F5C40; font-weight:600; font-family:var(--font-mono); width:28%; padding:10px 8px; text-align:right;">${fmtMoney(s.value)}</td>
+          </tr>
+        `;
+      });
+    }
+    document.getElementById('valueBreakdownBody').innerHTML = rows;
+    document.getElementById('valueBreakdownModal').hidden = false;
+  };
+
+  window.openActiveSchoolsList = function() {
+    let rows = '';
+    if (schoolsData.length === 0) {
+      rows = `<tr><td style="text-align:center; color:var(--ink-soft); padding:32px;">No active schools registered.</td></tr>`;
+    } else {
+      [...schoolsData].forEach((s, idx) => {
+        rows += `
+          <tr>
+            <td style="font-weight:600; color:var(--accent); width:100%; padding:12px 8px; word-break:break-word; white-space:normal;">${idx + 1}. ${escapeHtml(s.name)}</td>
+          </tr>
+        `;
+      });
+    }
+    document.getElementById('activeSchoolsBody').innerHTML = rows;
+    document.getElementById('activeSchoolsModal').hidden = false;
+  };
+
+  function manageSchoolsHTML() {
+    let rows = '';
+    if (allDistrictSchools.length === 0) {
+      rows = `<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--ink-soft);">No schools registered yet.</td></tr>`;
+    } else {
+      schoolsData.forEach(s => {
+        rows += `
+          <tr>
+            <td style="font-weight:600; color:var(--ink); padding:12px;">${escapeHtml(s.name)}</td>
+            <td style="color:var(--ink-soft); padding:12px;">
+              <strong>Email:</strong> ${escapeHtml(s.email)}<br>
+              <strong>Password:</strong> <span style="font-family:monospace; color:var(--ink);">${escapeHtml(s.password)}</span>
+            </td>
+            <td style="color:var(--ink-soft); padding:12px;">${s.type === 'community' ? 'Community' : 'STEM'}</td>
+            <td style="color:var(--ink-soft); padding:12px; white-space:nowrap;">
+              <span style="font-weight:600; color:var(--ink);">${s.activeLogins || 0}</span> / ${s.maxLogins || 3}
+              ${s.email === 'master@stem.edu.gh' ? '' : `
+                <button class="btn btn-ghost" style="color:var(--accent); padding:2px 6px; font-size:11px; margin-left:8px; border:1px solid var(--border);" onclick="refreshSchoolLogins('${escapeHtml(s.name)}')">Refresh</button>
+              `}
+            </td>
+            <td style="padding:12px;">
+              ${s.email === 'master@stem.edu.gh' ? `
+                <span style="color:var(--ink-soft); font-size:12px; font-style:italic; padding:4px 8px;">Admin Account (Protected)</span>
+              ` : `
+                <button class="btn btn-ghost" style="color:var(--danger); padding:4px 8px; font-size:12px;" onclick="promptRemoveSchool('${escapeHtml(s.name)}', '${escapeHtml(s.email)}')">Remove</button>
+              `}
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    return `
+      <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1 class="page-title">Manage Schools</h1>
+          <p class="page-subtitle">Register and manage district schools</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" style="background:var(--surface); border:1px solid var(--border);" onclick="document.getElementById('csvUploadInput').click()">Import CSV</button>
+          <input type="file" id="csvUploadInput" accept=".csv" style="display:none;" onchange="importCSV(this.files[0])">
+          <button class="btn btn-primary" onclick="document.getElementById('addSchoolModal').hidden = false">Add School</button>
+        </div>
+      </div>
+
+      <div style="background:var(--surface); border-radius:12px; border:1px solid var(--border); overflow-x:auto; overflow-y:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+          <thead>
+            <tr style="background:var(--surface-2); border-bottom:1px solid var(--border);">
+              <th style="padding:12px; font-weight:600; color:var(--ink-soft);">School Name</th>
+              <th style="padding:12px; font-weight:600; color:var(--ink-soft);">Credentials</th>
+              <th style="padding:12px; font-weight:600; color:var(--ink-soft);">Type</th>
+              <th style="padding:12px; font-weight:600; color:var(--ink-soft);">Logins</th>
+              <th style="padding:12px; font-weight:600; color:var(--ink-soft);">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add School Modal -->
+      <div id="addSchoolModal" class="glass-overlay" hidden>
+        <div class="glass-modal" style="max-width:400px; margin:40px auto;">
+          <h2 style="margin:0 0 16px 0; font-family:var(--font-display);">Add New School</h2>
+          <form id="addSchoolForm">
+            <div class="field">
+              <label>School Name</label>
+              <input type="text" id="addSchoolName" required placeholder="e.g. Abanu MA JHS">
+            </div>
+            <div class="field">
+              <label>Town / Location</label>
+              <input type="text" id="addSchoolTown" required placeholder="e.g. Kpando">
+            </div>
+            <div class="field">
+              <label>School Type</label>
+              <select id="addSchoolType" required>
+                <option value="stem">STEM (Equipped) School</option>
+                <option value="community">Community (Non-Equipped) School</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+              <button type="button" class="btn" style="flex:1;" onclick="document.getElementById('addSchoolModal').hidden = true">Cancel</button>
+              <button type="submit" class="btn btn-primary" style="flex:1;">Create School</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  
+function generateId() {
+  return 'item_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function getDefaultStemItems() {
+  const now = new Date().toISOString();
+  const b = {dateAdded: now, lastUpdated: now, status: 'Available', isLowStock: false};
+  
+  const rawData = [
+
+    // SCIENCE (JS)
+    { t: 'JS1', n: 'Balance compression 2kg', c: 'science', sc: 'Measuring Instruments', q: 2, u: 'Each', p: 350 },
+    { t: 'JS2', n: 'Beaker Glass 100ml', c: 'science', sc: 'Lab Glassware', q: 20, u: 'Each', p: 30 },
+    { t: 'JS3', n: 'Beaker Plastic 250ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 25 },
+    { t: 'JS4', n: 'Beaker Plastic 500ml', c: 'science', sc: 'Lab Glassware', q: 5, u: 'Each', p: 35 },
+    { t: 'JS5', n: 'Conducting Thermal Rods', c: 'science', sc: 'Heating & Cooling', q: 5, u: 'Each', p: 120 },
+    { t: 'JS6', n: 'Conical Flask 100ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 35 },
+    { t: 'JS7', n: 'Dropping Pipettes Plastic', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 2 },
+    { t: 'JS8', n: 'Electricity Kit', c: 'engineering', sc: 'Electronic Components', q: 1, u: 'Each', p: 450 },
+    { t: 'JS9', n: 'Electronics Kit', c: 'engineering', sc: 'Electronic Components', q: 9, u: 'Each', p: 400 },
+    { t: 'JS10', n: 'Evaporating Dish', c: 'science', sc: 'General Lab Equipment', q: 5, u: 'Each', p: 45 },
+    { t: 'JS11', n: 'Filter Paper 12.5cm', c: 'science', sc: 'General Lab Equipment', q: 4, u: 'Pack', p: 80 },
+    { t: 'JS12', n: 'Funnel Filter Plastic', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 15 },
+    { t: 'JS13', n: 'Iron Filings', c: 'science', sc: 'Chemicals & Reagents', q: 4, u: 'Pack', p: 40 },
+    { t: 'JS14', n: 'JHS Mapped Science Activity Book', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'JS15', n: 'Leads Red/Black with Croc-clips', c: 'engineering', sc: 'Electronic Components', q: 20, u: 'Each', p: 15 },
+    { t: 'JS16', n: 'Litmus Paper - Blue', c: 'science', sc: 'Chemicals & Reagents', q: 5, u: 'Books', p: 20 },
+    { t: 'JS17', n: 'Litmus Paper - Red', c: 'science', sc: 'Chemicals & Reagents', q: 5, u: 'Books', p: 20 },
+    { t: 'JS18', n: 'Magnet Kit', c: 'science', sc: 'General Lab Equipment', q: 2, u: 'Pack', p: 180 },
+    { t: 'JS19', n: 'Magnets (Bar)', c: 'science', sc: 'General Lab Equipment', q: 20, u: 'Each', p: 40 },
+    { t: 'JS20', n: 'Masses 100g', c: 'science', sc: 'Measuring Instruments', q: 4, u: 'Set', p: 150 },
+    { t: 'JS21', n: 'Measuring Cylinder Plastic 100ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 35 },
+    { t: 'JS22', n: 'Measuring Cylinder Plastic 250ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 50 },
+    { t: 'JS23', n: 'Metal Rod Retort, Base, Clamp', c: 'science', sc: 'General Lab Equipment', q: 3, u: 'Set', p: 250 },
+    { t: 'JS24', n: 'Mirrors Kit', c: 'science', sc: 'Microscopes & Optics', q: 3, u: 'Set', p: 120 },
+    { t: 'JS25', n: 'Optical Pins', c: 'science', sc: 'Microscopes & Optics', q: 1, u: 'Pack', p: 30 },
+    { t: 'JS26', n: 'Petri Dish Plastic 90mm', c: 'science', sc: 'Lab Glassware', q: 20, u: 'Each', p: 10 },
+    { t: 'JS27', n: 'Ray Box & Lenses Kit', c: 'science', sc: 'Microscopes & Optics', q: 4, u: 'Each', p: 300 },
+    { t: 'JS28', n: 'Safety Goggles (Junior)', c: 'science', sc: 'Safety Equipment', q: 45, u: 'Each', p: 25 },
+    { t: 'JS29', n: 'Spatulas', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 15 },
+    { t: 'JS30', n: 'Spirit Burners', c: 'science', sc: 'Heating & Cooling', q: 10, u: 'Each', p: 45 },
+    { t: 'JS31', n: 'Spring Balances 1kg', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 60 },
+    { t: 'JS32', n: 'Spring Balances 500g', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 60 },
+    { t: 'JS33', n: 'Stirrer (Plastic, Hand)', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 10 },
+    { t: 'JS34', n: 'Stoppers Assorted', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Each', p: 150 },
+    { t: 'JS35', n: 'Stopwatch Digital', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 80 },
+    { t: 'JS36', n: 'Syringes re-useable 10ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 5 },
+    { t: 'JS37', n: 'Syringes re-useable 20ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 8 },
+    { t: 'JS38', n: 'Syringes re-useable 2ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 3 },
+    { t: 'JS39', n: 'Syringes re-useable 5ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 4 },
+    { t: 'JS40', n: 'Test-tube Holder', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 25 },
+    { t: 'JS41', n: 'Test-tube Rack', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 45 },
+    { t: 'JS42', n: 'Test-tubes 16x100mm, Plastic with Lids', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 5 },
+    { t: 'JS43', n: 'Test-tubes 24x150mm, Glass', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 10 },
+    { t: 'JS44', n: 'Thermometer', c: 'science', sc: 'Measuring Instruments', q: 12, u: 'Each', p: 35 },
+    { t: 'JS45', n: 'Tongs', c: 'science', sc: 'General Lab Equipment', q: 5, u: 'Each', p: 30 },
+    { t: 'JS46', n: 'Transparent Tubing', c: 'science', sc: 'General Lab Equipment', q: 2, u: 'Roll', p: 40 },
+    { t: 'JS47', n: 'Stand with Wire Gauze for Spirit Burners', c: 'science', sc: 'Heating & Cooling', q: 10, u: 'Each', p: 60 },
+    { t: 'JS48', n: 'White Tile Spotted', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 40 },
+
+    // CHEMICALS (JC)
+    { t: 'JC1', n: 'Aluminium Foil', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Roll', p: 50 },
+    { t: 'JC2', n: "Benedict's Solution (Qualitative)", c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500ml', p: 150 },
+    { t: 'JC3', n: 'Calcium Chloride (Anhydrous)', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 180 },
+    { t: 'JC4', n: 'Calcium Hydroxide', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250g', p: 120 },
+    { t: 'JC5', n: 'Copper Metal Turnings', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250g', p: 200 },
+    { t: 'JC6', n: 'Copper Sulphate', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 250 },
+    { t: 'JC7', n: 'Hydrochloric Acid (1 Molar)', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '2.5L', p: 350 },
+    { t: 'JC8', n: 'Iodine Solution', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500ml', p: 180 },
+    { t: 'JC9', n: 'Magnesium Ribbon', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '25g', p: 150 },
+    { t: 'JC10', n: 'Industrial denatured alcohol', c: 'science', sc: 'Chemicals & Reagents', q: 2, u: '1L', p: 120 },
+    { t: 'JC11', n: 'Sodium Hydrogen Carbonate', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '1KG', p: 150 },
+    { t: 'JC12', n: 'Sodium Hydroxide', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '1KG', p: 200 },
+    { t: 'JC13', n: 'Universal Indicator pH4 - 11', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250ml', p: 180 },
+    { t: 'JC14', n: 'Zinc Metal', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 250 },
+
+    // MATH (JM)
+    { t: 'JM1', n: '100 Cards', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 45 },
+    { t: 'JM2', n: '360 Degree Protractor', c: 'math', sc: 'Geometry Sets', q: 45, u: 'Each', p: 15 },
+    { t: 'JM3', n: 'Calculator (4 function)', c: 'math', sc: 'Calculators', q: 45, u: 'Each', p: 60 },
+    { t: 'JM4', n: 'Counters', c: 'math', sc: 'Manipulatives & Models', q: 1, u: 'Pack', p: 150 },
+    { t: 'JM5', n: 'Dice Multi (4,8,10,12,20 sides)', c: 'math', sc: 'Manipulatives & Models', q: 15, u: 'Pack', p: 80 },
+    { t: 'JM6', n: 'Dice numeral', c: 'math', sc: 'Manipulatives & Models', q: 100, u: 'Each', p: 5 },
+    { t: 'JM7', n: 'Dice operator', c: 'math', sc: 'Manipulatives & Models', q: 45, u: 'Each', p: 5 },
+    { t: 'JM8', n: 'Geared Compasses', c: 'math', sc: 'Geometry Sets', q: 45, u: 'Each', p: 25 },
+    { t: 'JM9', n: 'GeoBoards (12x12) and Rubber Bands', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Each', p: 80 },
+    { t: 'JM10', n: 'Geometric Solids (19 piece)', c: 'math', sc: 'Manipulatives & Models', q: 1, u: 'Set', p: 250 },
+    { t: 'JM11', n: 'Geometry Builder Kit', c: 'math', sc: 'Geometry Sets', q: 9, u: 'Pack', p: 350 },
+    { t: 'JM12', n: 'GridLines Card Game', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 90 },
+    { t: 'JM13', n: 'JHS Mapped Mathematics Activity Book', c: 'math', sc: 'General Math Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'JM14', n: 'Large Plastic Storage Boxes', c: 'math', sc: 'General Math Equipment', q: 10, u: 'Each', p: 120 },
+    { t: 'JM15', n: 'Mini Chalk Slate', c: 'math', sc: 'General Math Equipment', q: 45, u: 'Each', p: 35 },
+    { t: 'JM16', n: 'Ruler 30cm', c: 'math', sc: 'Measuring Tools', q: 45, u: 'Each', p: 5 },
+    { t: 'JM17', n: 'Sand Timers', c: 'math', sc: 'Measuring Tools', q: 15, u: 'Each', p: 40 },
+    { t: 'JM18', n: 'Scissors (12RH/3LH)', c: 'math', sc: 'General Math Equipment', q: 15, u: 'Each', p: 15 },
+    { t: 'JM19', n: 'Tape Measure', c: 'math', sc: 'Measuring Tools', q: 15, u: 'Each', p: 10 },
+    { t: 'JM20', n: 'Target Maths Card Game Packs', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 120 },
+    { t: 'JM21', n: 'Teacher Board Equipment', c: 'math', sc: 'General Math Equipment', q: 1, u: 'Each', p: 250 },
+
+    // ICT & ENGINEERING (ICT)
+    { t: 'ICT1', n: 'Projector', c: 'it', sc: 'Projectors & Displays', q: 1, u: 'Each', p: 4500 },
+    { t: 'ICT2', n: 'Laptop', c: 'it', sc: 'Computers & Laptops', q: 1, u: 'Each', p: 7000 },
+    { t: 'ICT2b', n: 'Speaker', c: 'it', sc: 'Peripherals & Accessories', q: 1, u: 'Each', p: 300 },
+    { t: 'ICT3', n: 'Warranty (ICT1 & ICT2)', c: 'it', sc: 'General Engineering Equipment', q: 1, u: 'Each', p: 500 },
+    { t: 'ICT4', n: 'Programming Portal', c: 'it', sc: 'Software Licenses', q: 1, u: 'Each', p: 200 },
+    { t: 'ICT5', n: 'Robotics Educational Robot', c: 'engineering', sc: 'Robotics Kits', q: 1, u: 'Set', p: 1500 },
+    { t: 'ICT6', n: 'Datalogging Sensors', c: 'engineering', sc: 'Testing & Measurement Equipment', q: 1, u: 'Set', p: 800 },
+    { t: 'ICT7', n: 'JHS Mapped Tech & Engineering Book', c: 'engineering', sc: 'General Engineering Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'ICT8', n: 'Batteries and Charger', c: 'engineering', sc: 'Electronic Components', q: 1, u: 'Set', p: 250 }
+    ];
+
+  return rawData.map(item => Object.assign({}, b, {
+    id: generateId(),
+    name: item.n,
+    category: item.c,
+    subcategory: item.sc,
+    assetTag: item.t,
+    quantity: item.q,
+    unit: item.u,
+    cost: item.p,
+    location: ''
+  }));
+}
+
+  // MANAGE SCHOOLS LOGIC
+  // ==========================================
+
+  window.promptResetPassword = async function(email) {
+    if (!confirm("Generate a new password for " + email + "?")) return;
+    
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let newPassword = '';
+    for (let i = 0; i < 7; i++) {
+      newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    try {
+      if (!databases) {
+        alert("Appwrite is not connected.");
+        return;
+      }
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('email', email)]);
+      if (snap.documents.length === 0) {
+        alert("School not found in database.");
+        return;
+      }
+      
+      const schoolDoc = snap.documents[0];
+      await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, schoolDoc.$id, {
+        currentPassword: newPassword
+      });
+      
+      prompt("Password reset successful! Copy the new password below:", newPassword);
+      fetchSchools();
+    } catch(err) {
+      alert("Database Error: " + err.message);
+    }
+  };
+
+  window.promptRemoveSchool = async function(name, email) {
+    if (!confirm(`Are you SURE you want to permanently remove ${name}? This will delete their account and all inventory data, and log them out.`)) return;
+    
+    try {
+      if (!databases) return;
+      await databases.createDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REVOKED, ID.unique(), {
+        email: email,
+        schoolName: name,
+        revokedAt: new Date().toISOString()
+      });
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('email', email)]);
+      if (snap.documents.length > 0) {
+        await databases.deleteDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, snap.documents[0].$id);
+      }
+      alert(`School ${name} has been removed.`);
+      fetchSchools();
+    } catch(err) {
+      alert("Error removing school: " + err.message);
+    }
+  };
+
+  window.refreshSchoolLogins = async function(name) {
+    try {
+      if (!databases) return;
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', name)]);
+      if (snap.documents.length > 0) {
+        await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, snap.documents[0].$id, {
+          activeLogins: 0
+        });
+      }
+      alert(`Logins refreshed successfully for ${name}.`);
+      fetchSchools();
+    } catch(err) {
+      alert("Error refreshing logins: " + err.message);
+    }
+  };
+
+  window.importCSV = async function(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const text = e.target.result;
+      const lines = text.split('\n');
+      if (lines.length < 2) {
+         alert("CSV is empty or invalid format.");
+         return;
+      }
+      
+      alert(`Starting import of ${lines.length - 1} rows. Please wait, this might take a minute...`);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const parts = line.split(',');
+        if (parts.length >= 3) {
+          const name = parts[0].trim();
+          const town = parts[1].trim();
+          let type = parts[2].trim().toLowerCase();
+          if (type !== 'stem' && type !== 'community') type = 'stem';
+          
+          try {
+            await createSchoolAccount(name, town, type);
+            successCount++;
+          } catch(err) {
+            console.error("Error creating " + name, err);
+            errorCount++;
+          }
+        }
+      }
+      alert(`Import Complete!\nSuccessfully created: ${successCount}\nFailed/Skipped: ${errorCount}`);
+      document.getElementById('csvUploadInput').value = '';
+    };
+    reader.readAsText(file);
+  };
+
+  async function createSchoolAccount(name, town, type) {
+    const words = name.toLowerCase().replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w);
+    let base = words.map(w => w[0]).join('');
+    if (words.length === 1) base = words[0].substring(0, 6);
+    const rand = Math.floor(10 + Math.random() * 90);
+    const emailSlug = `${base}${rand}@stem.app`;
+    
+    // Generate secure 7-character alphanumeric password
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let defaultPassword = '';
+    for (let i = 0; i < 7; i++) {
+      defaultPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    const payload = {
+      schoolName: name,
+      email: emailSlug,
+      townName: town,
+      type: type,
+      currentPassword: defaultPassword,
+      items: type === 'stem' ? JSON.stringify(getDefaultStemItems()) : '[]',
+      activeLogins: 0,
+      maxLogins: 3,
+      lastSync: new Date().toISOString()
+    };
+
+    if (databases) {
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('email', emailSlug)]);
+      if (snap.documents.length > 0) {
+        await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, snap.documents[0].$id, payload);
+      } else {
+        await databases.createDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, ID.unique(), payload);
+      }
+    }
+
+    return { email: emailSlug, password: defaultPassword };
+  }
+
+  // ==========================================
+  // REAL-TIME APPWRITE SYNC
+  // ==========================================
+  
+  async function fetchRequests() {
+    if (!databases) return;
+    try {
+      const res = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, [Query.limit(100)]);
+      const list = [];
+      res.documents.forEach(doc => {
+        let items = [];
+        try { items = typeof doc.items === 'string' ? JSON.parse(doc.items) : (doc.items || []); } catch(e) { items = []; }
+        list.push({
+          ...doc,
+          id: doc.$id,
+          items: items
+        });
+      });
+
+      if (!approvalsInitialLoad) {
+        list.forEach(newReq => {
+          if (newReq.status === 'pending') {
+            const oldReq = districtRequests.find(o => o.id === newReq.id);
+            if (!oldReq) {
+              window.showToast("Approvals System", `New district request submitted by ${newReq.requesterSchool || newReq.requestingSchool}!`);
+            }
+          } else if (newReq.status === 'returned') {
+            const oldReq = districtRequests.find(o => o.id === newReq.id);
+            if (oldReq && oldReq.status !== 'returned') {
+              window.showToast("Return Completed", `${newReq.requesterSchool || newReq.requestingSchool} has successfully returned equipment to ${newReq.targetSchool}.`);
+            }
+          }
+        });
+      }
+      approvalsInitialLoad = false;
+
+      districtRequests = list.sort((a, b) => {
+        const tA = new Date(a.requestedAt || a.$createdAt || 0);
+        const tB = new Date(b.requestedAt || b.$createdAt || 0);
+        return tB - tA;
+      });
+
+      updateApprovalsBadge();
+
+      if (currentView === 'approvals') {
+        renderApprovalsDashboard();
+      }
+    } catch(err) {
+      console.error("Approvals fetch error:", err);
+    }
+  }
+
+  function startApprovalsListener() {
+    fetchRequests();
+    if (client) {
+      if (approvalsUnsubscribe) { approvalsUnsubscribe(); approvalsUnsubscribe = null; }
+      approvalsUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.REQUESTS}.documents`, () => {
+        fetchRequests();
+      });
+    }
+  }
+
+  window.showRequestsDrilldown = function(filter) {
+    let filtered = [];
+    let title = "District Requests";
+    if (filter === 'approved') {
+      filtered = districtRequests.filter(r => r.status === 'approved' || r.status === 'returning');
+      title = "Active Borrowed Items";
+    } else if (filter === 'pending') {
+      filtered = districtRequests.filter(r => r.status === 'pending');
+      title = "Requests Pending Review";
+    } else if (filter === 'returned') {
+      filtered = districtRequests.filter(r => r.status === 'returned');
+      title = "Returned Requests";
+    } else {
+      filtered = districtRequests;
+    }
+
+    let cardsHTML = '';
+    if (filtered.length === 0) {
+      cardsHTML = `<div style="text-align:center; color:var(--ink-soft); padding:30px; font-size:13px;">No requests found.</div>`;
+    } else {
+      cardsHTML = filtered.map(r => {
+        const statusColors = {
+          pending: { bg: '#FEF3C7', fg: '#D97706' },
+          approved: { bg: '#E1EFE6', fg: '#1F5C40' },
+          disapproved: { bg: '#F8E1DF', fg: '#A8332A' },
+          returning: { bg: '#FEF3C7', fg: '#D97706' },
+          returned: { bg: '#E1EFE6', fg: '#1F5C40' }
+        };
+        const colors = statusColors[r.status] || { bg: '#ECECEC', fg: '#666' };
+        const statusLabel = r.status === 'returning' ? 'Returning' : r.status.charAt(0).toUpperCase() + r.status.slice(1);
+        const qty = r.items ? r.items.reduce((sum, item) => sum + Number(item.quantity), 0) : 0;
+
+        return `
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface); text-align:left; font-size:13px;">
+            <div>
+              <div style="font-weight:700; color:var(--ink); font-size:13px;">
+                ${escapeHtml(r.requesterSchool || r.requestingSchool)} &rarr; ${escapeHtml(r.targetSchool)}
+              </div>
+              <div style="font-size:11px; color:var(--ink-soft); margin-top:3px;">
+                Requested ${qty} item${qty === 1 ? '' : 's'} on ${new Date(r.requestedAt || r.$createdAt || Date.now()).toLocaleDateString()}
+              </div>
+            </div>
+            <span class="badge" style="background:${colors.bg}; color:${colors.fg}; font-weight:600; font-size:10px; padding:2px 6px; border-radius:999px;">${statusLabel}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('requestsDrilldownTitle').innerText = title;
+    document.getElementById('requestsDrilldownBody').innerHTML = cardsHTML;
+    document.getElementById('requestsDrilldownModal').hidden = false;
+  };
+
+  function updateApprovalsBadge() {
+    const pendingCount = districtRequests.filter(r => r.status === 'pending').length;
+    const badges = document.querySelectorAll('.approvals-badge-counter');
+    badges.forEach(badge => {
+      badge.innerText = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  function approvalsHTML() {
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">District Approvals</h1>
+          <p class="page-subtitle">Monitor and review all borrowing requests district-wide</p>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card clickable-card" onclick="window.showRequestsDrilldown('all')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:transform 0.15s ease;">
+          <div class="stat-label" style="font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600;">Total Requests</div>
+          <div class="stat-value" id="metricsTotalReq" style="font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--accent);">0</div>
+        </div>
+        <div class="stat-card clickable-card" onclick="window.showRequestsDrilldown('pending')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:transform 0.15s ease;">
+          <div class="stat-label" style="font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600;">Pending Review</div>
+          <div class="stat-value" id="metricsPendingReq" style="font-family:var(--font-display); font-size:24px; font-weight:700; color:#D97706;">0</div>
+        </div>
+        <div class="stat-card clickable-card" onclick="window.showRequestsDrilldown('approved')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:transform 0.15s ease;">
+          <div class="stat-label" style="font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600;">Approved</div>
+          <div class="stat-value" id="metricsApprovedReq" style="font-family:var(--font-display); font-size:24px; font-weight:700; color:#2D6A4F;">0</div>
+        </div>
+        <div class="stat-card clickable-card" onclick="window.showRequestsDrilldown('returned')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); cursor:pointer; transition:transform 0.15s ease;">
+          <div class="stat-label" style="font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600;">Returned</div>
+          <div class="stat-value" id="metricsReturnedReq" style="font-family:var(--font-display); font-size:24px; font-weight:700; color:#1F5C40;">0</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow);">
+        <h3 style="margin:0 0 16px; font-family:var(--font-display); font-size:16px;">District Requests List</h3>
+        <div id="masterApprovalsList" style="display:flex; flex-direction:column; gap:14px;">
+          <div style="text-align:center; padding:30px; color:var(--ink-soft);">Loading requests...</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderApprovalsDashboard() {
+    const total = districtRequests.length;
+    const pending = districtRequests.filter(r => r.status === 'pending').length;
+    const approved = districtRequests.filter(r => r.status === 'approved' || r.status === 'returning').length;
+    const returned = districtRequests.filter(r => r.status === 'returned').length;
+
+    const elTotal = document.getElementById('metricsTotalReq');
+    const elPending = document.getElementById('metricsPendingReq');
+    const elApproved = document.getElementById('metricsApprovedReq');
+    const elReturned = document.getElementById('metricsReturnedReq');
+
+    if (elTotal) elTotal.innerText = total;
+    if (elPending) elPending.innerText = pending;
+    if (elApproved) elApproved.innerText = approved;
+    if (elReturned) elReturned.innerText = returned;
+
+    const listEl = document.getElementById('masterApprovalsList');
+    if (!listEl) return;
+
+    if (districtRequests.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center; padding:40px; color:var(--ink-soft); font-size:13px;">
+          No borrowing requests have been submitted in the district yet.
+        </div>
+      `;
+      return;
+    }
+
+    const statusColors = {
+      pending: { bg: '#FEF3C7', fg: '#D97706' },
+      approved: { bg: '#E1EFE6', fg: '#1F5C40' },
+      disapproved: { bg: '#F8E1DF', fg: '#A8332A' },
+      returning: { bg: '#FEF3C7', fg: '#D97706' },
+      returned: { bg: '#E1EFE6', fg: '#1F5C40' }
+    };
+
+    listEl.innerHTML = districtRequests.map(r => {
+      const colors = statusColors[r.status] || { bg: '#ECECEC', fg: '#666' };
+      let statusLabel = r.status === 'returning' ? 'Returning' : r.status.charAt(0).toUpperCase() + r.status.slice(1);
+      
+      const todayStr = new Date().toISOString().split('T')[0];
+      const isOverdue = (r.endDate && r.endDate < todayStr && r.status === 'approved');
+      if (isOverdue) {
+        statusLabel = '<span style="color:var(--danger); font-weight:800; margin-right:4px;">OVERDUE</span> ' + statusLabel;
+      }
+      
+      const itemsListHTML = (r.items || []).map(item => `
+        <div style="font-size:13px; color:var(--ink); padding:4px 0; display:flex; justify-content:space-between; border-bottom:1px dashed var(--surface-2);">
+          <span>${escapeHtml(item.itemName)}</span>
+          <strong style="font-family:var(--font-mono);">Qty ${item.quantity}</strong>
+        </div>
+      `).join('');
+
+      const locLabel = r.usageLocation === 'requester_school' 
+        ? `${r.requesterSchool || r.requestingSchool || "Borrowing school"} premises` 
+        : `${r.targetSchool || "Lending school"} premises`;
+      
+      let disapprovalReasonHTML = '';
+      if (r.status === 'disapproved' && r.disapprovalReason) {
+        disapprovalReasonHTML = `
+          <div style="margin-top:8px; padding:8px 10px; background:var(--danger-soft); border-left:3px solid var(--danger); border-radius:4px; font-size:12px;">
+            <strong style="color:var(--danger);">Disapproval Reason:</strong> ${escapeHtml(r.disapprovalReason)}
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card" style="padding:16px; border:1px solid ${isOverdue ? 'var(--danger)' : 'var(--border)'}; border-radius:var(--radius); background:var(--surface); text-align:left; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:var(--ink);">
+                ${escapeHtml(r.requesterSchool || r.requestingSchool)} <span style="font-weight:normal; color:var(--ink-soft); font-size:12px;">(${escapeHtml(r.requesterTown || '')})</span>
+                &rarr; ${escapeHtml(r.targetSchool)}
+              </div>
+              <div style="font-size:11px; color:var(--ink-soft); margin-top:2px;">Requested At: ${new Date(r.requestedAt || r.$createdAt || Date.now()).toLocaleString()}</div>
+            </div>
+            <span class="badge" style="background:${colors.bg}; color:${colors.fg}; font-weight:600; font-size:11px; padding:3px 8px; border-radius:999px;">${statusLabel}</span>
+          </div>
+
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:8px 12px; display:flex; flex-direction:column;">
+            <div style="font-size:10px; font-weight:600; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px; letter-spacing:0.04em;">Requested Items</div>
+            ${itemsListHTML}
+          </div>
+
+          <div style="font-size:12px; color:var(--ink-soft); display:flex; flex-direction:column; gap:4px;">
+            <div><strong>Teacher:</strong> ${escapeHtml(r.requestingTeacherName || 'N/A')} <span style="color:var(--ink-soft);">(${escapeHtml(r.requestingTeacherPhone || 'No Phone')})</span></div>
+            <div><strong>Location:</strong> ${escapeHtml(locLabel)}</div>
+            <div><strong>Dates:</strong> ${new Date(r.startDate).toLocaleDateString()} to ${new Date(r.endDate).toLocaleDateString()}</div>
+          </div>
+
+          ${disapprovalReasonHTML}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function fetchSchools() {
+    if (!databases) return;
+    try {
+      const res = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.limit(100)]);
+      schoolsData = [];
+      districtBrokenLostItems = [];
+      allDistrictSchools = [];
+
+      res.documents.forEach(data => {
+        const schoolName = data.schoolName || data.$id;
+        if (schoolName.toLowerCase() === 'ghana education service' || schoolName.toLowerCase() === 'science coordinator') {
+          return;
+        }
+
+        const email = (data.email || '').toLowerCase();
+        if (email === 'master@stem.edu.gh' || email === 'kpando.science.coordinator@gmail.com' || email === 'master') {
+          return;
+        }
+
+        let items = [];
+        try {
+          items = typeof data.items === 'string' ? JSON.parse(data.items) : (data.items || []);
+        } catch(e) { items = []; }
+
+        const schoolTotalQty = items.reduce((s,i) => s + (Number(i.quantity)||0), 0);
+        const schoolTotalValue = items.reduce((s,i) => {
+          const avail = (Number(i.quantity)||0) - (Number(i.brokenQty)||0) - (Number(i.lostQty)||0) - (Number(i.borrowedQty)||0);
+          return s + (avail * (Number(i.cost)||0));
+        }, 0);
+        
+        const brokenLost = items.filter(i => (Number(i.brokenQty)||0) > 0 || (Number(i.lostQty)||0) > 0);
+        const blCount = brokenLost.reduce((s,i) => s + (Number(i.brokenQty)||0) + (Number(i.lostQty)||0), 0);
+        
+        brokenLost.forEach(i => {
+          let statusText = [];
+          if ((i.brokenQty||0) > 0) statusText.push(`${i.brokenQty} Broken`);
+          if ((i.lostQty||0) > 0) statusText.push(`${i.lostQty} Lost`);
+
+          districtBrokenLostItems.push({
+            ...i,
+            schoolName: schoolName,
+            displayStatus: statusText.join(' / '),
+            blQuantity: (Number(i.brokenQty)||0) + (Number(i.lostQty)||0)
+          });
+        });
+
+        if (data.email) {
+          allDistrictSchools.push({ name: schoolName, email: data.email });
+        }
+
+        schoolsData.push({
+          id: data.$id,
+          name: schoolName,
+          email: data.email || 'No email',
+          password: data.currentPassword || 'password123',
+          type: data.type || 'stem',
+          qty: schoolTotalQty,
+          value: schoolTotalValue,
+          brokenLost: blCount,
+          activeLogins: data.activeLogins || 0,
+          maxLogins: data.maxLogins || 3,
+          lastSync: data.lastSync ? new Date(data.lastSync) : null
+        });
+      });
+
+      schoolsData.sort((a,b) => a.name.localeCompare(b.name));
+      
+      if (currentView === 'dashboard') {
+        render();
+      } else if (currentView === 'manageSchools') {
+        render();
+      }
+    } catch(err) {
+      console.error("Schools fetch error:", err);
+    }
+  }
+
+  function startSyncListeners() {
+    fetchSchools();
+    if (client) {
+      client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.SCHOOLS}.documents`, () => {
+        fetchSchools();
+      });
+    }
+
+    startChatListener();
+    startApprovalsListener();
+  }
+
+  // ==========================================
+  // WHATSAPP-STYLE CHAT LOGIC
+  // ==========================================
+  function getNameForEmail(email) {
+    if (email === 'master') return 'Science Coordinator';
+    if (email === 'broadcast') return 'Broadcast (All Schools)';
+    const school = allDistrictSchools.find(s => s.email === email);
+    if (school) return school.name;
+    const recent = recentChats.find(r => r.email === email);
+    if (recent) return recent.name;
+    return email;
+  }
+
+  function getLastMessageForRecipient(email) {
+    const filtered = chatMessages.filter(m => {
+      if (email === 'broadcast') {
+        return (m.senderEmail === 'master' && m.recipientEmail === 'broadcast') ||
+               (m.replyToBroadcast === true);
+      }
+      return (m.senderEmail === email && (m.recipientEmail === 'master' || m.type === 'master')) ||
+             ((m.senderEmail === 'master' || m.senderSchool === 'Science Coordinator') && m.recipientEmail === email);
+    });
+    return filtered.length > 0 ? filtered[filtered.length - 1] : null;
+  }
+
+  function chatListViewHTML() {
+    let chatItems = recentChats.map(r => {
+      const lastMsg = getLastMessageForRecipient(r.email);
+      let snippet = 'No messages yet';
+      let timeStr = '';
+      let ts = 0;
+      if (lastMsg) {
+        snippet = lastMsg.text || '';
+        if (snippet.length > 40) snippet = snippet.substring(0, 40) + '…';
+        let d = lastMsg.timestamp;
+        if (d && typeof d.toDate === 'function') d = d.toDate();
+        if (d) {
+          ts = new Date(d).getTime();
+          timeStr = new Date(d).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+      }
+      const badge = unreadCounts[r.email] || 0;
+      return { email: r.email, name: r.name, snippet, timeStr, ts, badge };
+    });
+    chatItems.sort((a,b) => (b.ts || 0) - (a.ts || 0));
+
+    let rowsHTML = '';
+    if (chatItems.length === 0) {
+      rowsHTML = `
+        <div class="chat-list-empty">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <p><strong>No conversations started yet</strong></p>
+          <p style="margin-top:6px;">Tap <strong>New</strong> above to select a school and start a chat.</p>
+        </div>`;
+    } else {
+      rowsHTML = chatItems.map(c => `
+        <div class="recent-chat-row" onclick="openConversation('${escapeHtml(c.email)}')" ontouchstart="chatRowTouchStart(event, '${escapeHtml(c.email)}')" ontouchend="chatRowTouchEnd(event, '${escapeHtml(c.email)}')" onmousedown="chatRowMouseDown(event, '${escapeHtml(c.email)}')" onmouseup="chatRowMouseUp(event, '${escapeHtml(c.email)}')" onmouseleave="chatRowMouseLeave(event)">
+          <div class="chat-avatar" style="background:${getAvatarColor(c.email)}">${getInitials(c.name)}</div>
+          <div class="recent-chat-info">
+            <div class="recent-chat-name">${escapeHtml(c.name)}</div>
+            <div class="recent-chat-snippet">${escapeHtml(c.snippet)}</div>
+          </div>
+          <div class="recent-chat-meta">
+            ${c.timeStr ? `<div class="recent-chat-time">${c.timeStr}</div>` : ''}
+            ${c.badge > 0 ? `<div class="recent-chat-badge">${c.badge}</div>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">School Direct Messages</h1>
+          <p class="page-subtitle">Chat Hub</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewMessageSheet()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          New Chat
+        </button>
+      </div>
+
+      <div class="chat-list-view">
+        <div class="chat-list-body">
+          ${rowsHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  window.openNewMessageSheet = function() {
+    const overlay = document.getElementById('nmOverlay');
+    if (!overlay) return;
+    overlay.classList.add('show');
+
+    const list = document.getElementById('nmSchoolList');
+    if (allDistrictSchools.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:13px;">No registered schools found in the district database.</div>';
+      return;
+    }
+
+    let html = `
+      <div class="nm-school-row" onclick="selectNewRecipient('broadcast','Broadcast (All Schools)')" style="border-bottom:2px solid var(--border); margin-bottom:12px; padding-bottom:12px;">
+        <div class="chat-avatar" style="background:#E3F2FD; color:#1976D2; width:36px; height:36px; font-size:13px; display:flex; align-items:center; justify-content:center;">📢</div>
+        <div>
+          <div class="nm-school-name" style="color:#1976D2; font-weight:700;">Broadcast Message</div>
+          <div class="nm-school-email" style="color:#1976D2;">Send a message to all schools at once</div>
+        </div>
+      </div>`;
+    allDistrictSchools.forEach(s => {
+      html += `
+        <div class="nm-school-row" onclick="selectNewRecipient('${escapeHtml(s.email)}','${escapeHtml(s.name)}')">
+          <div class="chat-avatar" style="background:${getAvatarColor(s.email)};width:36px;height:36px;font-size:13px;">${getInitials(s.name)}</div>
+          <div>
+            <div class="nm-school-name">${escapeHtml(s.name)}</div>
+            <div class="nm-school-email">${escapeHtml(s.email)}</div>
+          </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+  };
+
+  window.closeNewMessageSheet = function() {
+    const overlay = document.getElementById('nmOverlay');
+    if (overlay) overlay.classList.remove('show');
+  };
+
+  window.selectNewRecipient = function(email, name) {
+    closeNewMessageSheet();
+    addToRecentChats(email, name);
+    setTimeout(() => openConversation(email), 200);
+  };
+
+  /* ---------- Chat Long Press Deletion & Open ---------- */
+  let touchTimer = null;
+  window.isLongPressing = false;
+
+  window.chatRowTouchStart = function(event, email) {
+    if (touchTimer) clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => {
+      touchTimer = null;
+      window.isLongPressing = true;
+      window.confirmDeleteConversation(email);
+    }, 600);
+  };
+
+  window.chatRowTouchEnd = function(event, email) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.chatRowMouseDown = function(event, email) {
+    if (touchTimer) clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => {
+      touchTimer = null;
+      window.isLongPressing = true;
+      window.confirmDeleteConversation(email);
+    }, 600);
+  };
+
+  window.chatRowMouseUp = function(event, email) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.chatRowMouseLeave = function(event) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.confirmDeleteConversation = async function(email) {
+    const schoolName = getNameForEmail(email) || email;
+    if (confirm(`Delete Conversation?\n\nWarning: This action will permanently delete all messages in this conversation for both schools. This cannot be undone.`)) {
+      try {
+        if (!databases) return;
+        const convoId = email === 'broadcast' ? 'broadcast' : ['master', email].sort().join('_');
+        const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, [Query.equal('convoId', convoId), Query.limit(100)]);
+        for (const doc of snap.documents) {
+          await databases.deleteDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, doc.$id);
+        }
+        if (typeof showToast === 'function') {
+          showToast("System", "Conversation deleted");
+        } else {
+          alert("Conversation deleted");
+        }
+        recentChats = recentChats.filter(r => r.email !== email);
+        saveRecentChats();
+        fetchChatMessages();
+      } catch(err) {
+        console.error("Error deleting conversation: ", err);
+        alert("Error deleting conversation: " + err.message);
+      }
+    } else {
+      window.isLongPressing = false;
+    }
+  };
+
+  /* ---------- Open / Close Conversation ---------- */
+  window.openConversation = function(email) {
+    if (window.isLongPressing) {
+      window.isLongPressing = false;
+      return;
+    }
+    currentChatRecipient = email;
+    const name = getNameForEmail(email);
+    addToRecentChats(email, name);
+
+    // Clear unread badge
+    if (unreadCounts[email]) {
+      unreadCounts[email] = 0;
+      updateChatBadge();
+    }
+
+    let lastReadTimestamps = JSON.parse(localStorage.getItem('stem_master_last_read_timestamps') || '{}');
+    lastReadTimestamps[email] = Date.now();
+    localStorage.setItem('stem_master_last_read_timestamps', JSON.stringify(lastReadTimestamps));
+
+    const avatar = document.getElementById('convoAvatar');
+    const nameEl = document.getElementById('convoName');
+    if (avatar) {
+      avatar.style.background = getAvatarColor(email);
+      avatar.textContent = getInitials(name);
+    }
+    if (nameEl) nameEl.textContent = name;
+
+    renderConvoMessages();
+
+    const overlay = document.getElementById('convoOverlay');
+    if (overlay) {
+      document.body.classList.add('convo-open');
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    }
+  };
+
+  window.closeConversation = function() {
+    const overlay = document.getElementById('convoOverlay');
+    if (overlay) overlay.classList.remove('open');
+    document.body.classList.remove('convo-open');
+    currentChatRecipient = null;
+    if (currentView === 'chat') {
+      const root = document.getElementById('view');
+      if (root) root.innerHTML = chatListViewHTML();
+    }
+  };
+
+  function renderConvoMessages() {
+    const area = document.getElementById('convoMessages');
+    if (!area || !currentChatRecipient) return;
+
+    const filtered = chatMessages.filter(m => {
+      if (currentChatRecipient === 'broadcast') {
+        return (m.senderEmail === 'master' && m.recipientEmail === 'broadcast') ||
+               (m.replyToBroadcast === true);
+      }
+      return (m.senderEmail === currentChatRecipient && (m.recipientEmail === 'master' || m.type === 'master')) ||
+             ((m.senderEmail === 'master' || m.senderSchool === 'Science Coordinator') && m.recipientEmail === currentChatRecipient);
+    });
+
+    if (filtered.length === 0) {
+      area.innerHTML = `<div style="text-align:center; color:var(--ink-soft); font-size:12px; margin-top:30px;">
+        No messages with this school yet. Type below to start the conversation!
+      </div>`;
+      return;
+    }
+
+    area.innerHTML = filtered.map(m => {
+      const isMine = m.senderEmail === 'master' || m.senderSchool === 'Science Coordinator';
+      let ts = m.timestamp;
+      if (ts && typeof ts.toDate === 'function') ts = ts.toDate();
+      const time = ts ? (new Date(ts).toLocaleDateString([], {month:'short', day:'numeric'}) + ', ' + new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})) : 'Now';
+      const senderName = isMine ? 'You' : escapeHtml(m.senderSchool || 'User');
+      return `
+        <div class="chat-bubble ${isMine ? 'mine' : 'theirs'}">
+          <div class="chat-sender">${senderName}</div>
+          <div>${escapeHtml(m.text)}</div>
+          <div class="chat-time">${time}</div>
+        </div>`;
+    }).join('');
+
+    setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+  }
+
+  function updateChatBadge() {
+    const badges = document.querySelectorAll('.chat-badge-counter');
+    const total = getUnreadTotal();
+    badges.forEach(badge => {
+      badge.innerText = total;
+      badge.style.display = total > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  async function fetchChatMessages() {
+    if (!databases) return;
+    try {
+      const res = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, [Query.limit(100), Query.orderAsc('createdAt')]);
+      const newMessages = res.documents.map(d => ({
+        id: d.$id,
+        senderEmail: d.sender,
+        recipientEmail: d.recipient,
+        senderSchool: d.senderSchool || d.sender,
+        text: d.text,
+        timestamp: d.createdAt || d.$createdAt,
+        type: d.type || (d.recipient === 'broadcast' ? 'broadcast' : 'direct'),
+        ...d
+      }));
+
+      let lastReadTimestamps = JSON.parse(localStorage.getItem('stem_master_last_read_timestamps') || '{}');
+      const newUnreadCounts = {};
+
+      newMessages.forEach(m => {
+        if (m.senderEmail === 'master' || m.senderSchool === 'Science Coordinator') return;
+        if (m.recipientEmail !== 'master' && m.type !== 'master' && m.recipientEmail !== 'broadcast') return;
+
+        const senderKey = m.senderEmail;
+        const senderName = m.senderSchool || m.senderEmail;
+        if (!recentChats.some(r => r.email === senderKey)) {
+          addToRecentChats(senderKey, senderName);
+        }
+
+        const msgTs = new Date(m.timestamp).getTime() || 0;
+        const lastReadTs = lastReadTimestamps[senderKey] || 0;
+        const isViewingThis = currentView === 'chat' && currentChatRecipient === senderKey &&
+                              document.getElementById('convoOverlay')?.classList.contains('open');
+
+        if (isViewingThis) {
+          lastReadTimestamps[senderKey] = Math.max(lastReadTs, msgTs);
+          localStorage.setItem('stem_master_last_read_timestamps', JSON.stringify(lastReadTimestamps));
+        } else if (msgTs > lastReadTs) {
+          newUnreadCounts[senderKey] = (newUnreadCounts[senderKey] || 0) + 1;
+        }
+      });
+
+      if (chatMessages.length > 0 && newMessages.length > chatMessages.length) {
+        for (let i = chatMessages.length; i < newMessages.length; i++) {
+          const m = newMessages[i];
+          if (m.senderEmail === 'master' || m.senderSchool === 'Science Coordinator') continue;
+          showToast(m.senderSchool || 'School', m.text || '');
+        }
+      }
+
+      unreadCounts = newUnreadCounts;
+      updateChatBadge();
+      chatMessages = newMessages;
+
+      if (currentChatRecipient && document.getElementById('convoOverlay')?.classList.contains('open')) {
+        renderConvoMessages();
+      }
+
+      if (currentView === 'chat' && !document.getElementById('convoOverlay')?.classList.contains('open')) {
+        const root = document.getElementById('view');
+        if (root) root.innerHTML = chatListViewHTML();
+      }
+    } catch(err) {
+      console.error("Chat fetch error:", err);
+    }
+  }
+
+  function startChatListener() {
+    fetchChatMessages();
+    if (client) {
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      chatUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.MESSAGES}.documents`, () => {
+        fetchChatMessages();
+      });
+    }
+  }
+
+  window.handleChatSubmit = async function(e) {
+    e.preventDefault();
+    if (!appSettings.isAuthenticated || !databases || !currentChatRecipient) return;
+    const input = document.getElementById('convoInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+
+    try {
+      const convoId = currentChatRecipient === 'broadcast' ? 'broadcast' : ['master', currentChatRecipient].sort().join('_');
+      await databases.createDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, ID.unique(), {
+        convoId: convoId,
+        sender: 'master',
+        recipient: currentChatRecipient,
+        text: text,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+
+      let lastReadTimestamps = JSON.parse(localStorage.getItem('stem_master_last_read_timestamps') || '{}');
+      lastReadTimestamps[currentChatRecipient] = Date.now();
+      localStorage.setItem('stem_master_last_read_timestamps', JSON.stringify(lastReadTimestamps));
+      fetchChatMessages();
+    } catch(err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message: " + err.message);
+    }
+  };
+
+  // ==========================================
+  // TOAST ALERTS & AUDIO BEEP
+  // ==========================================
+  window.showToast = function(senderName, messageText) {
+    if (!document.getElementById('toastNotification')) {
+      const toast = document.createElement('div');
+      toast.id = 'toastNotification';
+      toast.className = 'toast-notification';
+      toast.innerHTML = `
+        <div class="chat-avatar" style="width: 32px; height: 32px; font-size: 13px; background: var(--accent);" id="toastAvatar"></div>
+        <div style="flex:1; overflow:hidden;">
+          <div style="font-weight:600; font-size:13px; margin-bottom:2px;" id="toastTitle"></div>
+          <div style="font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink-soft);" id="toastText"></div>
+        </div>`;
+      toast.onclick = () => {
+        toast.classList.remove('show');
+        currentView = 'chat';
+        render();
+        const msgSender = chatMessages.find(m => m.senderSchool === senderName || getNameForEmail(m.senderEmail) === senderName);
+        if (msgSender) {
+          openConversation(msgSender.senderEmail);
+        }
+      };
+      document.body.appendChild(toast);
+    }
+    
+    const toast = document.getElementById('toastNotification');
+    const title = document.getElementById('toastTitle');
+    const text = document.getElementById('toastText');
+    const avatar = document.getElementById('toastAvatar');
+    
+    avatar.innerText = getInitials(senderName);
+    title.innerText = `New message from ${senderName}`;
+    text.innerText = messageText;
+    
+    toast.classList.add('show');
+    
+    // Play alert beep sound
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 880;
+      gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    } catch(e) {}
+
+    setTimeout(() => { toast.classList.remove('show'); }, 4000);
+  };
+
+  // ==========================================
+  // GLOBAL LISTENERS & ACTIONS
+  // ==========================================
+  function setupGlobalListeners() {
+    document.body.addEventListener('click', e => {
+      const el = e.target.closest('[data-action]');
+      if (!el) return;
+      const action = el.dataset.action;
+
+      if (action === 'set-view') {
+        // Close conversation overlay if open
+        const convoOv = document.getElementById('convoOverlay');
+        if (convoOv && convoOv.classList.contains('open')) {
+          convoOv.classList.remove('open');
+          document.body.classList.remove('convo-open');
+          currentChatRecipient = null;
+        }
+        currentView = el.dataset.view;
+        render();
+      } else if (action === 'logout') {
+        if (account) {
+          account.deleteSession('current').catch(console.error);
+        }
+        appSettings.isAuthenticated = false;
+        appSettings.email = '';
+        saveSettings();
+        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        if (approvalsUnsubscribe) { approvalsUnsubscribe(); approvalsUnsubscribe = null; }
+        approvalsInitialLoad = true;
+        currentView = 'login';
+        render();
+      }
+    });
+
+    document.body.addEventListener('submit', async e => {
+      if (e.target.id === 'addSchoolForm') {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const name = document.getElementById('addSchoolName').value.trim();
+        const town = document.getElementById('addSchoolTown').value.trim();
+        const type = document.getElementById('addSchoolType').value;
+        
+        btn.textContent = 'Creating...';
+        btn.disabled = true;
+        
+        try {
+          const creds = await createSchoolAccount(name, town, type);
+          document.getElementById('addSchoolForm').reset();
+          document.getElementById('addSchoolModal').hidden = true;
+          prompt(`School created successfully!\nCopy the generated credentials below:\n\nEmail: ${creds.email}\nPassword: ${creds.password}`, `Email: ${creds.email}\nPassword: ${creds.password}`);
+        } catch(err) {
+          alert("Error creating school: " + err.message);
+        } finally {
+          btn.textContent = 'Create School';
+          btn.disabled = false;
+        }
+        return;
+      }
+
+      if (e.target.id === 'loginForm') {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const pwd = document.getElementById('loginPassword').value;
+        const errDiv = document.getElementById('loginError');
+        if (errDiv) errDiv.style.display = 'none';
+
+        if (email !== 'master@stem.edu.gh') {
+          if (errDiv) {
+            errDiv.style.display = 'block';
+            errDiv.textContent = "Access Denied: Only master@stem.edu.gh has authorization.";
+          } else {
+            alert("Access Denied: Only master@stem.edu.gh has authorization.");
+          }
+          return;
+        }
+
+        try {
+          if (account) {
+            try {
+              await account.createEmailPasswordSession(email, pwd);
+            } catch(authErr) {
+              if (authErr.code === 404 || authErr.type === 'user_not_found') {
+                try {
+                  await account.create(ID.unique(), email, pwd, 'Science Coordinator');
+                  await account.createEmailPasswordSession(email, pwd);
+                } catch(e) {}
+              }
+            }
+          }
+          appSettings.isAuthenticated = true;
+          appSettings.email = email;
+          saveSettings();
+
+          currentView = 'dashboard';
+          startSyncListeners();
+          render();
+        } catch(error) {
+          if (errDiv) {
+            errDiv.style.display = 'block';
+            errDiv.textContent = error.message;
+          } else {
+            alert("Sign in failed: " + error.message);
+          }
+        }
+      } else if (e.target.id === 'convoForm') {
+        // Handled inline in onsubmit
+      }
+    });
+
+    document.getElementById('drilldownModal').addEventListener('click', e => {
+      if (e.target.id === 'drilldownModal') e.target.hidden = true;
+    });
+
+    document.getElementById('valueBreakdownModal').addEventListener('click', e => {
+      if (e.target.id === 'valueBreakdownModal') e.target.hidden = true;
+    });
+
+    document.getElementById('activeSchoolsModal').addEventListener('click', e => {
+      if (e.target.id === 'activeSchoolsModal') e.target.hidden = true;
+    });
+
+    document.getElementById('requestsDrilldownModal').addEventListener('click', e => {
+      if (e.target.id === 'requestsDrilldownModal') e.target.hidden = true;
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.getElementById('drilldownModal').hidden = true;
+        document.getElementById('valueBreakdownModal').hidden = true;
+        document.getElementById('activeSchoolsModal').hidden = true;
+        document.getElementById('requestsDrilldownModal').hidden = true;
+        if (currentChatRecipient) {
+          closeConversation();
+        }
+      }
+    });
+  }
+
+  // ==========================================
+  // INITIALIZATION
+  // ==========================================
+  async function init() {
+    try {
+      if (account) {
+        try {
+          const user = await account.get();
+          if (user && user.email === 'master@stem.edu.gh') {
+            appSettings.isAuthenticated = true;
+            appSettings.email = user.email;
+            saveSettings();
+            currentView = 'dashboard';
+            startSyncListeners();
+            render();
+          } else {
+            throw new Error('Not master user');
+          }
+        } catch (e) {
+          if (appSettings.isAuthenticated && appSettings.email === 'master@stem.edu.gh') {
+            currentView = 'dashboard';
+            startSyncListeners();
+            render();
+          } else {
+            appSettings.isAuthenticated = false;
+            appSettings.email = '';
+            saveSettings();
+            currentView = 'login';
+            render();
+          }
+        }
+      } else {
+        if (appSettings.isAuthenticated && appSettings.email === 'master@stem.edu.gh') {
+          currentView = 'dashboard';
+          startSyncListeners();
+          render();
+        } else {
+          currentView = 'login';
+          render();
+        }
+      }
+
+      setupGlobalListeners();
+      setupPushNotifications();
+
+      let pct = 0;
+      const pctEl = document.getElementById('splashPercent');
+      const iv = setInterval(() => {
+        pct += 3;
+        if (pctEl) pctEl.style.width = Math.min(pct, 100) + '%';
+        if (pct >= 100) {
+          clearInterval(iv);
+          const splash = document.getElementById('splashScreen');
+          if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 400);
+          }
+        }
+      }, 50);
+    } catch(e) {
+      alert("Error: " + e.message);
+      console.error(e);
+    }
+  }
+
+  init();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "780990606970",
+    "project_id": "kpando-stem-ledger",
+    "storage_bucket": "kpando-stem-ledger.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780990606970:android:3b29c9165d214646",
+        "android_client_info": {
+          "package_name": "com.flawlex.stemledger.mobile"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDt1qbLpG5Qk2xR4J5bIsZRtbGe0Pnn8Ss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780990606970:android:3b29c9165d214647",
+        "android_client_info": {
+          "package_name": "com.flawlex.stemledger.community"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDt1qbLpG5Qk2xR4J5bIsZRtbGe0Pnn8Ss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780990606970:android:3b29c9165d214648",
+        "android_client_info": {
+          "package_name": "com.flawlex.stemledger.master"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDt1qbLpG5Qk2xR4J5bIsZRtbGe0Pnn8Ss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

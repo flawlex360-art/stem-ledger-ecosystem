@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kpando Municipal STEM Ledger Portal Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1C2D5E;
+      --accent: #2563EB;
+      --bg: #0F172A;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.15);
+      --text-main: #FFFFFF;
+      --text-sub: #94A3B8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at top, #1E293B, #0F172A);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container {
+      width: 100%;
+      max-width: 960px;
+      text-align: center;
+    }
+    .header-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(37, 99, 235, 0.4);
+      border-radius: 999px;
+      color: #60A5FA;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.sub {
+      color: var(--text-sub);
+      font-size: clamp(14px, 2vw, 16px);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: left;
+      backdrop-filter: blur(16px);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(96, 165, 250, 0.5);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    }
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    .icon-master { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .icon-school { background: rgba(37, 99, 235, 0.15); color: #3B82F6; border: 1px solid rgba(37, 99, 235, 0.3); }
+    .icon-community { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      color: var(--text-sub);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      font-weight: 600;
+      color: #FFFFFF;
+      transition: background 0.2s;
+    }
+    .card:hover .btn {
+      background: #2563EB;
+    }
+    footer {
+      margin-top: 50px;
+      color: #64748B;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-badge">Ghana Education Service &middot; Kpando Municipal</div>
+    <h1>STEM Ledger Ecosystem</h1>
+    <p class="sub">Unified district equipment tracking, inter-school lending supervision, and municipal resource management.</p>
+    
+    <div class="grid">
+      <a href="/master/" class="card">
+        <div>
+          <div class="icon icon-master">&#9874;</div>
+          <h3>STEM Master Portal</h3>
+          <p>Science Coordinator dashboard for managing district school credentials, monitoring aggregate inventory, and supervising borrow requests.</p>
+        </div>
+        <div class="btn">Launch Portal &rarr;</div>
+      </a>
+
+      <a href="/school/" class="card">
+        <div>
+          <div class="icon icon-school">&#9881;</div>
+          <h3>STEM School App</h3>
+          <p>Inventory management for Senior High & STEM institutions to track broken, lost, and low stock quantities and approve lending requests.</p>
+        </div>
+        <div class="btn">Launch App &rarr;</div>
+      </a>
+
+      <a href="/community/" class="card">
+        <div>
+          <div class="icon icon-community">&#128218;</div>
+          <h3>STEM Community App</h3>
+          <p>Equipment catalog for community basic schools to discover available STEM tools, request borrowing, and track returns.</p>
+        </div>
+        <div class="btn">Launch App &rarr;</div>
+      </a>
+    </div>
+
+    <footer>Created by Kpando Anglican STEM Club &middot; Powered by Appwrite & Vercel</footer>
+  </div>
+</body>
+</html>

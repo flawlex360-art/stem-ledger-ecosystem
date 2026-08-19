@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kpando STEM Community</string>
+    <string name="title_activity_main">Kpando STEM Community</string>
+    <string name="package_name">com.flawlex.stemledger.community</string>
+    <string name="custom_url_scheme">com.flawlex.stemledger.community</string>
+</resources>

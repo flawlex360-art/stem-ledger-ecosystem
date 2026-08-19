@@ -1,0 +1,23 @@
+{
+  "name": "stem_ledger_master_portal",
+  "version": "1.0.0",
+  "description": "Dedicated Master Portal app for District Admin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/local-notifications": "^8.2.0",
+    "@capacitor/push-notifications": "^8.1.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1"
+  }
+}

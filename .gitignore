@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs & binaries
+*.apk
+*.pb
+*.docx
+*.pdf
+*.zip
+*.log
+
+# Python / Environment
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Android Build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+.gradle/
+
+# Unrelated project folders in scratch
+cbt-system/
+clinic-management-system/
+flawlex-it/
+flawlex-mastery/
+kpando-stem-club/
+ocr_project/
+school-assessment-system/
+school-grading-app/
+st-elisha-hospital/
+stem_ledger_app/
+stem_ledger_v2_fixed_extracted/
+firebase_test/
+production_builds/
+functions/
+scripts/
+
+# Root temporary files & scripts
+*.py
+*.txt
+basic7-materials-textbook.md
+materials_textbook_master.md
+cleanup.js
+clear_data.js
+fcm_processor.js
+fetch_all_schools.js
+fetch_requests_rest.js
+generate_docx.js
+list_requests.js
+migrate_db_data.js
+print_step_6317.js
+print_step_details.js
+query_requests.js
+register_test_school.js
+requests_list.json
+schools_list.json
+temp_script_0.js
+test.js
+test_*.js
+update_*.js
+verify_*.js
+user_inputs.txt
