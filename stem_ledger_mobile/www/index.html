@@ -3027,6 +3027,7 @@ function setupGlobalListeners(){
       approvalsUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.REQUESTS}.documents`, () => {
         fetchApprovals();
       });
+    }
   }
 
   function timeAgo(date) {
@@ -3434,6 +3435,7 @@ async function init(){
             localStorage.removeItem('stem_settings');
             currentView = 'login';
             render();
+            dismissSplash();
             return;
           }
         } catch(e) {
@@ -3454,21 +3456,31 @@ async function init(){
     }
 
     await loadItems();
-  setupGlobalListeners();
-  setupPushNotifications();
-  if (appSettings.isAuthenticated) {
-    if (window.fcmTokenValue) {
-      saveFCMTokenToDatabase(window.fcmTokenValue);
+    setupGlobalListeners();
+    setupPushNotifications();
+    if (appSettings.isAuthenticated) {
+      if (window.fcmTokenValue) {
+        saveFCMTokenToDatabase(window.fcmTokenValue);
+      }
+      startInventoryListener();
+      startChatListener();
+      startApprovalsListener();
     }
-    startInventoryListener();
-    startChatListener();
-    startApprovalsListener();
-  }
 
+    render();
+    dismissSplash();
+  } catch(e) {
+    console.error("Initialization error:", e);
+    render();
+    dismissSplash();
+  }
+}
+
+function dismissSplash() {
   let pct = 0;
   const pctEl = document.getElementById('splashPercent');
   const iv = setInterval(() => {
-    pct += 2;
+    pct += 5;
     if (pctEl) pctEl.style.width = Math.min(pct, 100) + '%';
     if (pct >= 100) {
       clearInterval(iv);
@@ -3478,8 +3490,7 @@ async function init(){
         setTimeout(() => splash.remove(), 500);
       }
     }
-  }, 100);
-  } catch(e) { alert("Error: " + e.message); console.error(e); }
+  }, 40);
 }
 
   // Swipe to change tabs
