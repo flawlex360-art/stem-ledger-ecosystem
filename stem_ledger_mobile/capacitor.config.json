@@ -1,0 +1,9 @@
+{
+  "appId": "com.flawlex.stemledger.mobile",
+  "appName": "STEM Ledger",
+  "webDir": "www",
+  "server": {
+    "url": "https://kpando-stem-ledger.vercel.app/school/",
+    "cleartext": true
+  }
+}

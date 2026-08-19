@@ -1,0 +1,3579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flawlex STEM Ledger</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+*{ box-sizing: border-box; }
+html, body{ margin:0; padding:0; overflow-x: hidden; }
+body.convo-open { overflow: hidden !important; height: 100vh !important; }
+
+:root{
+  --bg:#F2F4F1;
+  --surface:#FFFFFF;
+  --surface-2:#E8ECE7;
+  --ink:#202C26;
+  --ink-soft:#69766D;
+  --border:#D8DFD8;
+  --accent:#1C2D5E;
+  --accent-soft:#E8EDF6;
+  --danger:#C1453A;
+  --danger-soft:#F8E4E1;
+  --science:#2D6A4F;
+  --it:#3DBFA0;
+  --math:#C9622A;
+  --engineering:#6B4FA0;
+  --radius:10px;
+  --radius-sm:6px;
+  --shadow:0 1px 2px rgba(32,44,38,0.06), 0 6px 16px rgba(32,44,38,0.05);
+  --font-display:'Roboto', sans-serif;
+  --font-body:'Roboto', sans-serif;
+  --font-mono:'IBM Plex Mono', monospace;
+}
+
+body{
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Layout ---------- */
+.app{ display:flex; min-height:100vh; }
+
+.sidebar{
+  width:268px; flex-shrink:0; background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:28px;
+  padding:24px 20px; position:sticky; top:0; height:100vh; overflow-y:auto; z-index:40;
+}
+.main{ flex:1; padding:28px 36px 60px; min-width:0; }
+
+/* ---------- Brand ---------- */
+.brand{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.brand-title{ font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:-0.01em; }
+.brand-sub{ font-size:12px; color:var(--ink-soft); }
+
+/* ---------- Nav ---------- */
+.nav{ display:flex; flex-direction:column; gap:4px; }
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:var(--radius-sm);
+  border:none; background:transparent; cursor:pointer;
+  font-family:var(--font-body); font-size:14px; font-weight:500;
+  color:var(--ink-soft); text-align:left; width:100%;
+}
+.nav-item:hover{ background:var(--surface-2); color:var(--ink); }
+.nav-item.active{ background:var(--accent-soft); color:var(--accent); font-weight:600; }
+
+/* ---------- Sidebar sections ---------- */
+.sidebar-section{ display:flex; flex-direction:column; gap:4px; }
+.sidebar-section.data-section{ margin-top:auto; gap:6px; }
+.sidebar-label{ font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px; }
+
+.category-nav-item{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:8px 12px; border-radius:var(--radius-sm); border:none; background:transparent;
+  cursor:pointer; font-size:13px; color:var(--ink); text-align:left;
+}
+.category-nav-item:hover{ background:var(--surface-2); }
+.category-nav-item.active{ background:var(--surface-2); font-weight:600; }
+.category-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.category-nav-item .count{ margin-left:auto; color:var(--ink-soft); font-family:var(--font-mono); font-size:12px; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:var(--font-body); font-size:13px; font-weight:600;
+  padding:9px 14px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface); color:var(--ink); cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  transition:background .15s ease, border-color .15s ease, color .15s ease;
+}
+.btn:hover{ background:var(--surface-2); }
+.btn-primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn-primary:hover{ background:#255A42; }
+.btn-ghost{ border-color:transparent; background:transparent; color:var(--ink-soft); justify-content:flex-start; width:100%; font-weight:500; }
+.btn-ghost:hover{ background:var(--surface-2); color:var(--ink); }
+
+/* ---------- Topbar ---------- */
+.topbar{ display:flex; gap:14px; align-items:center; margin-bottom:24px; flex-wrap:wrap; }
+.search-wrap{ flex:1; min-width:220px; }
+.search-wrap input{
+  width:100%; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface); font-family:var(--font-body); font-size:14px; color:var(--ink);
+}
+.search-wrap input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.menu-toggle{ display:none; border:1px solid var(--border); background:var(--surface); border-radius:var(--radius-sm); padding:8px 11px; cursor:pointer; font-size:15px; }
+
+/* ---------- Page header ---------- */
+.page-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:24px; flex-wrap:wrap; }
+.page-title{ font-family:var(--font-display); font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-0.01em; }
+.page-subtitle{ color:var(--ink-soft); font-size:14px; margin:0; }
+
+.stamp{
+  width:108px; height:108px; border:6px double var(--accent);
+  border-radius:50%; transform:rotate(-7deg); flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:var(--font-mono); color:var(--accent); text-align:center;
+}
+.stamp .stamp-num{ font-size:26px; font-weight:700; line-height:1; }
+.stamp .stamp-label{ font-size:9px; letter-spacing:0.12em; text-transform:uppercase; margin-top:4px; }
+
+/* ---------- Stat cards ---------- */
+.stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:28px; }
+.stat-card{ display:flex; flex-direction:column; justify-content:space-between; height:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.15); z-index: 2; position: relative; }
+.stat-card .stat-label{ font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px; font-weight:600; }
+.stat-card .stat-value{ font-family:var(--font-display); font-size:24px; font-weight:700; }
+.stat-card .stat-meta{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+/* ---------- Dashboard panels ---------- */
+.dash-grid{ display:grid; grid-template-columns:1.1fr 1fr; gap:18px; }
+.panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); }
+.panel h3{ margin:0 0 16px; font-family:var(--font-display); font-size:16px; }
+
+.donut-row{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+.donut{ width:140px; height:140px; border-radius:50%; flex-shrink:0; position:relative; box-shadow: inset 0 4px 8px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.1); }
+.donut-center{ position:absolute; inset:24px; background:var(--surface); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.donut-center .num{ font-family:var(--font-display); font-size:22px; font-weight:700; }
+.donut-center .lbl{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.06em; }
+.legend{ display:flex; flex-direction:column; gap:10px; flex:1; min-width:160px; }
+.legend-item{ display:flex; align-items:center; gap:10px; font-size:13px; }
+.legend-item .category-dot{ width:10px; height:10px; }
+.legend-item .legend-name{ flex:1; }
+.legend-item .legend-count{ font-family:var(--font-mono); color:var(--ink-soft); }
+
+.attention-list{ display:flex; flex-direction:column; gap:8px; }
+.attention-item{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); }
+.attention-item .category-dot{ width:8px; height:8px; flex-shrink:0; }
+.attention-item .att-name{ font-weight:600; }
+.attention-item .att-reason{ font-size:12px; color:var(--ink-soft); }
+.attention-item > div{ flex:1; min-width:0; }
+.empty-note{ color:var(--ink-soft); font-size:13px; padding:8px 0; }
+
+/* ---------- Filters ---------- */
+.filter-bar{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+.pill{ padding:7px 14px; border-radius:999px; border:1px solid var(--border); background:var(--surface); font-size:13px; cursor:pointer; font-weight:500; color:var(--ink-soft); font-family:var(--font-body); }
+.pill.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.select-sm{ padding:8px 10px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); font-size:13px; color:var(--ink); font-family:var(--font-body); }
+
+/* ---------- Table ---------- */
+.table-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:13px; min-width:820px; }
+thead th{
+  text-align:left; padding:12px 14px; background:var(--surface-2); font-size:11px;
+  text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); font-weight:600;
+  cursor:pointer; user-select:none; white-space:nowrap;
+}
+thead th .arrow{ opacity:0.5; margin-left:4px; }
+tbody td{ padding:12px 14px; border-top:1px solid var(--border); vertical-align:middle; }
+tbody tr{ border-left:4px solid transparent; }
+tbody tr td:first-child{ font-weight:600; }
+.row-name-sub{ display:block; font-size:12px; color:var(--ink-soft); font-weight:400; margin-top:2px; }
+.qty-cell{ font-family:var(--font-mono); white-space:nowrap; }
+.row-actions{ display:flex; gap:6px; }
+.icon-btn{ border:1px solid var(--border); background:var(--surface); border-radius:var(--radius-sm); padding:6px 10px; cursor:pointer; font-size:12px; font-family:var(--font-body); font-weight:600; color:var(--ink); white-space:nowrap; }
+.icon-btn:hover{ background:var(--surface-2); }
+.icon-btn.danger:hover{ background:var(--danger-soft); border-color:var(--danger); color:var(--danger); }
+
+.badge{ display:inline-flex; align-items:center; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap; }
+.asset-tag{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.04em; background:var(--surface-2); border:1px dashed var(--border); border-radius:4px; padding:2px 7px; display:inline-block; }
+
+  /* ---------- Glass Modal ---------- */
+  .glass-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .glass-overlay:not([hidden]) {
+    opacity: 1; pointer-events: auto;
+  }
+  .glass-modal {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+    width: 100%; max-width: 500px; max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .glass-overlay:not([hidden]) .glass-modal {
+    transform: translateY(0);
+  }
+  .clickable-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .clickable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  }
+  .clickable-row {
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .clickable-row:hover {
+    background: var(--surface-2) !important;
+  }
+
+  /* ---------- Modal ---------- */
+.modal-overlay{ position:fixed; inset:0; background:rgba(32,44,38,0.45); display:flex; align-items:center; justify-content:center; padding:20px; z-index: 500; }
+.modal-overlay[hidden]{ display:none; }
+
+  /* ---------- Toast notification ---------- */
+  .toast-notification {
+    position: fixed; top: -100px; left: 50%; transform: translate3d(-50%, 0, 0);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 14px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 9999; display: flex; align-items: center; gap: 12px;
+    transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 13px; max-width: calc(100% - 32px); width: 360px;
+    box-sizing: border-box; color: var(--ink);
+  }
+  .toast-notification.show { top: 20px; }
+  .modal-overlay, .modal, .sidebar-wrapper, .bottom-nav-bar, .sheet-overlay, .overlay-sheet {
+    transform: translate3d(0,0,0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+  .toast-notification {
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+.modal{ background:var(--surface); border-radius:var(--radius); width:100%; max-width:660px; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.22); }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; padding:18px 22px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); }
+.modal-header h3{ margin:0; font-family:var(--font-display); font-size:18px; }
+.modal-body{ padding:22px; }
+.modal-footer{ padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+.close-btn{ border:none; background:transparent; font-size:22px; cursor:pointer; color:var(--ink-soft); line-height:1; padding:2px 6px; border-radius:var(--radius-sm); }
+.close-btn:hover{ background:var(--surface-2); }
+
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field.full{ grid-column:1 / -1; }
+.field label{ font-size:12px; font-weight:600; color:var(--ink-soft); }
+.field input, .field select, .field textarea{
+  padding:9px 11px; border:1px solid var(--border); border-radius:var(--radius-sm);
+  font-family:var(--font-body); font-size:13px; background:var(--bg); color:var(--ink);
+}
+.field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.field textarea{ resize:vertical; min-height:60px; }
+
+/* ---------- Storage notice ---------- */
+.storage-notice{ font-size:11px; color:var(--ink-soft); background:var(--surface-2); border-radius:var(--radius-sm); padding:9px 10px; line-height:1.45; margin-top:8px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width:880px){
+  .sidebar{
+    position:fixed; left:0; top:0; transform:translateX(-100%);
+    transition:transform .2s ease; width:268px; box-shadow:0 0 0 9999px rgba(0,0,0,0); 
+  }
+  .sidebar.open{ transform:translateX(0); box-shadow:0 0 40px rgba(0,0,0,0.25); }
+  .main{ padding:20px; }
+  .menu-toggle{ display:flex; align-items:center; justify-content:center; }
+  .stat-grid{ grid-template-columns:repeat(2,1fr); }
+  .dash-grid{ grid-template-columns:1fr; }
+  .form-grid{ grid-template-columns:1fr; }
+}
+
+
+
+
+
+  /* Compact List Styles */
+  .compact-list-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    border-left-width: 4px;
+    border-left-style: solid;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+  .compact-list-item:active {
+    background: var(--surface-2);
+    transform: scale(0.99);
+  }
+  .row-top, .row-bottom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .row-bottom {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .item-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-qty { font-weight: 500; font-size: 12px; }
+  .item-status .badge { font-size: 10px; padding: 2px 6px; }
+  .item-cat { flex: 1; }
+  .item-tag { 
+    background: var(--surface-2); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-family: monospace; 
+  }
+
+</style>
+
+<style>
+/* --- MOBILE APP OVERRIDES --- */
+@media (max-width: 880px) {
+  body { padding-bottom: 80px; }
+  .sidebar { display: none !important; }
+  .main { padding: 15px; }
+  .page-title { font-size: 22px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+    .chat-bubble.me { margin-left: 10%; max-width: 90%; }
+    .chat-bubble.them { margin-right: 10%; max-width: 90%; }
+  
+  /* Topbar & Search */
+  .topbar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .topbar .btn-primary { display: none; } /* Replaced by FAB */
+  .menu-toggle { display: none; }
+  
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface);
+    display: flex; justify-content: space-around; padding: 12px 0 20px;
+    border-top: 1px solid var(--border); z-index: 400; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+  }
+  .bottom-nav-btn {
+    background: none; border: none; font-size: 12px; font-weight: 600; color: var(--ink-soft);
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 8px;
+  }
+  .bottom-nav-btn.active { color: var(--accent); background: var(--accent-soft); }
+  .bottom-nav-btn svg { width: 20px; height: 20px; fill: currentColor; }
+  
+  /* Floating Action Button */
+  .fab {
+    position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px;
+    background: var(--accent); color: white; border: none; border-radius: 50%;
+    font-size: 28px; box-shadow: 0 4px 14px rgba(28, 45, 94, 0.4);
+    display: flex; align-items: center; justify-content: center; z-index: 399; cursor: pointer;
+  }
+  
+  /* Modal tweaks */
+  .modal { max-height: 100vh; height: 100vh; border-radius: 0; display: flex; flex-direction: column; }
+  .modal-body { flex: 1; overflow-y: auto; }
+}
+
+
+
+
+</style>    <style>
+  .page-fade-in {
+    animation: premiumEntrance 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    will-change: transform, opacity, filter;
+  }
+  @keyframes premiumEntrance {
+    0% {
+      opacity: 0;
+      transform: scale(0.88) translateY(45px);
+      filter: blur(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0);
+    }
+  }
+  #splashScreen {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: url('splash_bg.jpg') no-repeat center center/cover;
+    z-index: 99999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; transition: opacity 0.5s ease;
+  }
+  #splashScreen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 1;
+  }
+  .splash-card {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: calc(100% - 40px); max-width: 320px;
+    padding: 32px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+  .splash-title { font-size: 28px; font-weight: 700; margin-bottom: 15px; font-family: var(--font-display); color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  .splash-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .splash-progress-fill { width: 0%; height: 100%; background: #ffffff; transition: width 0.1s linear; }
+  .splash-footer { margin-top: 24px; font-size: 11px; opacity: 0.85; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255, 255, 255, 0.9); }
+  
+    /* ========== CHAT UI — WhatsApp-style ========== */
+
+    /* --- Recent Chats List (main chat view) --- */
+    .chat-list-view {
+      display: flex; flex-direction: column;
+      background: transparent;
+      margin: 0;
+      overflow: visible;
+    }
+    .chat-list-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .chat-list-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; color: var(--ink-soft); text-align: center; padding: 40px 20px;
+    }
+    .chat-list-empty svg { width: 56px; height: 56px; fill: var(--border); margin-bottom: 12px; }
+    .chat-list-empty p { font-size: 13px; margin: 0; }
+
+    /* Individual recent-chat row */
+    .recent-chat-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+    .recent-chat-row:last-child {
+      border-bottom: none;
+    }
+    .recent-chat-row:active { background: var(--surface-2); }
+    .chat-avatar {
+      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: white;
+    }
+    .recent-chat-info { flex: 1; min-width: 0; }
+    .recent-chat-name { font-weight: 600; font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent-chat-snippet { font-size: 12px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .recent-chat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .recent-chat-time { font-size: 10px; color: var(--ink-soft); }
+    .recent-chat-badge {
+      background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    }
+
+    /* --- Full-screen Conversation Overlay --- */
+    .convo-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 80px; z-index: 300;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.28s;
+      visibility: hidden;
+      overflow: hidden;
+    }
+    .convo-overlay.open { transform: translateX(0); visibility: visible; transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+    .convo-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--accent); color: white;
+      flex-shrink: 0;
+    }
+    .convo-back-btn {
+      background: none; border: none; color: white; cursor: pointer;
+      padding: 4px; display: flex; align-items: center;
+    }
+    .convo-back-btn svg { width: 22px; height: 22px; fill: white; }
+    .convo-header-name { font-weight: 600; font-size: 15px; flex: 1; }
+    .convo-header-sub { font-size: 11px; opacity: 0.8; }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+      background: linear-gradient(180deg, #eef1f5 0%, #e8ecf0 100%);
+    }
+    .chat-bubble {
+      max-width: 82%; padding: 8px 12px; border-radius: 14px;
+      position: relative; word-wrap: break-word;
+      font-size: 13px; line-height: 1.45;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+    }
+    .chat-bubble.mine {
+      align-self: flex-end;
+      background: var(--accent); color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble.theirs {
+      align-self: flex-start;
+      background: white; color: var(--ink);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-sender { font-size: 10px; font-weight: 700; margin-bottom: 2px; }
+    .chat-bubble.mine .chat-sender { color: rgba(255,255,255,0.85); text-align: right; }
+    .chat-bubble.theirs .chat-sender { color: var(--accent); }
+    .chat-time { font-size: 13px; opacity: 0.65; margin-top: 3px; text-align: right; }
+
+    .chat-input-area {
+      padding: 8px 12px; background: white;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1; background: var(--surface-2); border: none;
+      padding: 10px 14px; border-radius: 22px; outline: none; font-size: 13px;
+    }
+    .chat-send-btn {
+      background: var(--accent); color: white; border: none; border-radius: 50%;
+      width: 38px; height: 38px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.1s;
+    }
+    .chat-send-btn:active { transform: scale(0.92); }
+    .chat-send-btn svg { width: 18px; height: 18px; fill: white; margin-left: 1px; }
+
+    /* --- New-Message bottom sheet (school picker) --- */
+    .nm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 500; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s; display: flex; align-items: flex-end;
+    }
+    .nm-overlay.show { opacity: 1; pointer-events: auto; }
+    .nm-sheet {
+      background: white; width: 100%; max-height: 75vh;
+      border-radius: 18px 18px 0 0; padding: 0;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex; flex-direction: column;
+    }
+    .nm-overlay.show .nm-sheet { transform: translateY(0); }
+    .nm-sheet-header {
+      padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nm-sheet-header h3 { margin: 0; font-size: 16px; font-family: var(--font-display); }
+    .nm-sheet-close {
+      background: var(--surface-2); border: none; width: 28px; height: 28px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer; color: var(--ink-soft);
+    }
+    .nm-sheet-list { overflow-y: auto; flex: 1; }
+    .nm-school-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 18px; cursor: pointer;
+      border-bottom: 1px solid var(--surface-2);
+      transition: background 0.15s;
+    }
+    .nm-school-row:active { background: var(--surface-2); }
+    .nm-school-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+    .nm-school-email { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+
+    .badge-icon { position: absolute; top: 0px; right: 8px; background: var(--danger); color: white; font-size: 9px; font-weight: bold; border-radius: 10px; padding: 2px 5px; min-width: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .bottom-nav-btn { position: relative; }
+  </style>
+  <!-- Appwrite Web SDK & Configuration -->
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+  <script src="appwrite_config.js"></script>
+</head>  <body>
+    <div id="splashScreen">
+      <div class="splash-card">
+        <div class="splash-title">STEM Ledger</div>
+        <div class="splash-progress-bar"><div class="splash-progress-fill" id="splashPercent"></div></div>
+        <div class="splash-footer">created by Kpando Anglican STEM Club</div>
+      </div>
+    </div>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="b_generate_a_simple_bu.jpeg" alt="Flawlex IT Consult Logo" style="width: 100%; max-width: 220px; height: auto; border-radius: var(--radius-sm);">
+        <div>
+          <div class="brand-title" style="font-size:16px;color:#162464; margin-top: 4px;">Flawlex STEM</div>
+          <div class="brand-sub" style="font-size:11px;font-weight:600;color:#777;letter-spacing:0.04em">Ledger</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item" data-action="set-view" data-view="dashboard">Dashboard</button>
+      <button class="nav-item active" data-action="set-view" data-view="inventory">Inventory</button>
+      <button class="nav-item" data-action="set-view" data-view="chat">
+        Messages
+        <span class="chat-badge-counter" style="display:none; margin-left:auto; background:var(--danger); color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px;">0</span>
+      </button>
+      <button class="nav-item" data-action="set-view" data-view="approvals">
+        Approvals
+        <span class="approvals-badge-counter" style="display:none; margin-left:auto; background:var(--danger); color:white; font-size:11px; font-weight:bold; padding:2px 6px; border-radius:10px;">0</span>
+      </button>
+      <button class="nav-item" data-action="set-view" data-view="settings">Settings</button>
+    </nav>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Categories</div>
+      <div id="categoryNav"></div>
+    </div>
+
+    <div class="sidebar-section data-section">
+      <div class="sidebar-label">Data</div>
+      <button class="btn btn-ghost" data-action="export-csv">&darr; Export as CSV</button>
+      <button class="btn btn-ghost" data-action="export-json">&darr; Export backup (JSON)</button>
+      <label class="btn btn-ghost" for="importFile">&uarr; Import backup</label>
+      <input type="file" id="importFile" accept="application/json" hidden>
+      <button class="btn btn-ghost" style="color:var(--danger);" data-action="logout">Log Out</button>
+      <div class="storage-notice" id="storageNotice"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-toggle" data-action="toggle-sidebar" aria-label="Toggle menu">ÃƒÂƒÃ‚Â¢ÃƒÂ‚Ã‚Â˜ÃƒÂ‚Ã‚Â°</button>
+      <div class="search-wrap">
+        <input id="searchInput" type="text" placeholder="Search by name, asset tag, serial number, or location...">
+      </div>
+      <button class="btn btn-primary" data-action="add-item">+ New item</button>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" id="modal"></div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bottom-nav-btn active" data-action="set-view" data-view="dashboard">
+    <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    Dashboard
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="inventory">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+    Inventory
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="chat">
+    <span class="badge-icon chat-badge-counter" id="chatBadge" style="display:none">0</span>
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+    Messages
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="approvals">
+    <span class="badge-icon approvals-badge-counter" id="approvalsBadge" style="display:none">0</span>
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    Approvals
+  </button>
+  <button class="bottom-nav-btn" data-action="set-view" data-view="settings">
+    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+    Settings
+  </button>
+</div>
+
+<div style="text-align:center; padding: 10px; font-size: 11px; color: var(--ink-soft); margin-bottom: 70px;">
+  powered by Kpando Anglican STEM Club
+</div>
+
+<button class="fab" data-action="add-item">+</button>
+
+<!-- Toast Notification Overlay -->
+<div class="toast-notification" id="toastNotification">
+  <div style="background:var(--accent-soft); padding:6px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--accent)"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+  </div>
+  <div id="toastMessage" style="flex:1; min-width:0; word-break:break-word; overflow-wrap:break-word; white-space:normal;">New notification!</div>
+</div>
+
+<!-- Dashboard Drilldown Modal -->
+<div class="glass-overlay" id="dashboardDrilldownModal" hidden>
+  <div class="glass-modal">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 id="drilldownTitle" style="margin:0; font-family:var(--font-display); font-size:18px;">Details</h2>
+      <button class="icon-btn" onclick="document.getElementById('dashboardDrilldownModal').hidden=true;">&times;</button>
+    </div>
+    <div id="drilldownBody" style="display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- Item Details Modal -->
+<div class="glass-overlay" id="itemDetailsModal" hidden>
+  <div class="glass-modal" style="max-width: 400px; width: 90%; padding:0;">
+    <div class="modal-header" style="padding:16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+      <h2 id="viewItemName" style="margin:0; font-family:var(--font-display); font-size:18px;">Item Details</h2>
+      <button class="icon-btn" onclick="document.getElementById('itemDetailsModal').hidden=true;">&times;</button>
+    </div>
+    <div class="modal-body" id="itemDetailsBody" style="padding:16px; font-size:14px; line-height:1.6; display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto;">
+    </div>
+    <div class="modal-footer" style="justify-content:space-between; margin-top:0px; padding:16px; border-top:1px solid var(--border);">
+      <button class="btn danger" id="viewItemDeleteBtn">Delete</button>
+      <button class="btn primary" id="viewItemEditBtn">Edit Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Conversation overlay (full-screen) -->
+<div class="convo-overlay" id="convoOverlay">
+  <div class="convo-header">
+    <button class="convo-back-btn" onclick="closeConversation()">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </button>
+    <div class="chat-avatar" id="convoAvatar" style="width:34px;height:34px;font-size:13px;"></div>
+    <div style="flex:1;">
+      <div class="convo-header-name" id="convoName"></div>
+    </div>
+  </div>
+  <div class="chat-messages" id="convoMessages"></div>
+  <form class="chat-input-area" id="convoForm" onsubmit="handleChatSubmit(event)">
+    <input type="text" class="chat-input" id="convoInput" placeholder="Type a message…" required autocomplete="off">
+    <button type="submit" class="chat-send-btn">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </form>
+</div>
+
+<!-- New Message bottom sheet -->
+<div class="nm-overlay" id="nmOverlay" onclick="if(event.target===this) closeNewMessageSheet()">
+  <div class="nm-sheet">
+    <div class="nm-sheet-header">
+      <h3>Select a school</h3>
+      <button class="nm-sheet-close" onclick="closeNewMessageSheet()">&times;</button>
+    </div>
+    <div class="nm-sheet-list" id="nmSchoolList">
+      <div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px;">Loading schools…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+/* =====================================================
+   DATA MODEL
+===================================================== */
+const CATEGORIES = {
+  science: {
+    label:'STEM / Science Equipment', short:'Science', color:'var(--science)', hex:'#2D6A4F', prefix:'SCI',
+    },
+  it: {
+    label:'IT Infrastructure', short:'IT', color:'var(--it)', hex:'#1D6E8A', prefix:'ITI',
+    },
+  math: {
+    label:'Mathematics Equipment', short:'Mathematics', color:'var(--math)', hex:'#C9622A', prefix:'MTH',
+    },
+  engineering: {
+    label:'Engineering Equipment', short:'Engineering', color:'var(--engineering)', hex:'#6B4FA0', prefix:'ENG',
+    }
+};
+const STATUSES = ['Available','In Use','Reserved','Under Maintenance','Needs Repair','Broken','Lost','Retired'];
+const UNITS = ['Each','Pack','Set','Roll','Books','Boxes','500ml','500g','250g','2.5L','25g','1L','1KG'];
+
+const STATUS_COLORS = {
+  'Available':        {bg:'#E1EFE6', fg:'#1F5C40'},
+  'In Use':           {bg:'#E5EEF5', fg:'#235A78'},
+  'Reserved':         {bg:'#EFE6F7', fg:'#5E3F8A'},
+  'Under Maintenance':{bg:'#FBEFDD', fg:'#92521A'},
+  'Needs Repair':     {bg:'#FCE5CD', fg:'#B45F06'},
+  'Broken':           {bg:'#F8E1DF', fg:'#A8332A'},
+  'Lost':             {bg:'#4A4A4A', fg:'#FFFFFF'},
+  'Retired':          {bg:'#ECECEC', fg:'#666666'},
+  'Low Stock':        {bg:'#FFF3CD', fg:'#856404'}
+};
+
+const STORAGE_KEY = 'flawlex-stem-ledger-v3';
+const appwriteCfg = window.APPWRITE_CONFIG || {
+  ENDPOINT: 'https://cloud.appwrite.io/v1',
+  PROJECT_ID: '6a8597db0023283e1bde',
+  DATABASE_ID: 'stem_ledger_db',
+  COLLECTIONS: {
+    SCHOOLS: 'schools',
+    REQUESTS: 'equipment_requests',
+    MESSAGES: 'messages',
+    REVOKED: 'revoked_schools'
+  },
+  BUCKET_ID: 'stem_assets'
+};
+
+const { Client, Account, Databases, Storage, ID, Query } = window.Appwrite || {};
+let client = null;
+let account = null;
+let databases = null;
+let storage = null;
+
+if (window.Appwrite) {
+  client = new Client().setEndpoint(appwriteCfg.ENDPOINT).setProject(appwriteCfg.PROJECT_ID);
+  account = new Account(client);
+  databases = new Databases(client);
+  storage = new Storage(client);
+}
+
+function setupBackButtonHandler() {
+  try {
+    if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.App) {
+      const { App } = Capacitor.Plugins;
+      let lastBackPress = 0;
+
+      App.addListener('backButton', (data) => {
+        const convoOverlay = document.getElementById('convoOverlay');
+        if (convoOverlay && convoOverlay.classList.contains('open')) {
+          if (typeof window.closeConversation === 'function') {
+            window.closeConversation();
+          } else {
+            convoOverlay.classList.remove('open');
+            document.body.classList.remove('convo-open');
+          }
+          return;
+        }
+
+        const nmOverlay = document.getElementById('nmOverlay');
+        if (nmOverlay && nmOverlay.classList.contains('show')) {
+          if (typeof window.closeNewMessageSheet === 'function') {
+            window.closeNewMessageSheet();
+          } else {
+            nmOverlay.classList.remove('show');
+          }
+          return;
+        }
+
+        const drilldownModal = document.getElementById('dashboardDrilldownModal');
+        if (drilldownModal && !drilldownModal.hidden) {
+          drilldownModal.hidden = true;
+          return;
+        }
+
+        const itemDetailsModal = document.getElementById('itemDetailsModal');
+        if (itemDetailsModal && !itemDetailsModal.hidden) {
+          itemDetailsModal.hidden = true;
+          return;
+        }
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay && !modalOverlay.hidden) {
+          modalOverlay.hidden = true;
+          return;
+        }
+
+        if (appSettings && appSettings.isAuthenticated && currentView !== 'dashboard') {
+          const dashBtn = document.querySelector('[data-view="dashboard"]');
+          if (dashBtn) {
+            dashBtn.click();
+          } else {
+            currentView = 'dashboard';
+            if (typeof renderView === 'function') renderView();
+          }
+          return;
+        }
+
+        const now = Date.now();
+        if (now - lastBackPress < 2000) {
+          App.exitApp();
+        } else {
+          lastBackPress = now;
+          if (typeof window.showToast === 'function') {
+            window.showToast("System", "Press back again to exit");
+          } else {
+            alert("Press back again to exit");
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.error("Error setting up back button handler:", e);
+  }
+}
+setupBackButtonHandler();
+
+function setupAppStateChangeListener() {
+  try {
+    if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.App) {
+      const { App } = Capacitor.Plugins;
+      App.addListener('appStateChange', (state) => {
+        if (state.isActive) {
+          console.log("App became active. Refreshing data from Appwrite...");
+          if (typeof startInventoryListener === 'function') startInventoryListener();
+          if (typeof startChatListener === 'function') startChatListener();
+          if (typeof startApprovalsListener === 'function') startApprovalsListener();
+        }
+      });
+    }
+  } catch (e) {
+    console.error("Error setting up app state change listener:", e);
+  }
+}
+setupAppStateChangeListener();
+
+window.fcmTokenValue = null;
+
+function saveFCMTokenToDatabase(tokenValue) {
+  console.log("Push token registered:", tokenValue);
+}
+
+function setupPushNotifications() {
+  try {
+    if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.PushNotifications) {
+      const { PushNotifications } = Capacitor.Plugins;
+
+      if (Capacitor.getPlatform() === 'android') {
+        PushNotifications.createChannel({
+          id: 'default',
+          name: 'Default Channel',
+          description: 'Default notification channel',
+          importance: 3,
+          visibility: 1,
+          sound: 'beep.wav'
+        }).then(() => {
+          console.log("Default push notification channel created/updated.");
+        }).catch(err => {
+          console.error("Failed to create notification channel:", err);
+        });
+      }
+
+      PushNotifications.requestPermissions().then((result) => {
+        if (result.receive === 'granted') {
+          PushNotifications.register();
+        } else {
+          console.warn("Push notification permission denied.");
+        }
+      });
+
+      PushNotifications.addListener('registration', (token) => {
+        console.log("Push registration success, token: " + token.value);
+        window.fcmTokenValue = token.value;
+        saveFCMTokenToDatabase(token.value);
+      });
+
+      PushNotifications.addListener('registrationError', (error) => {
+        console.error("Push registration error: " + error.error);
+      });
+
+      PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        console.log("Push received: ", notification);
+        if (typeof showToast === 'function') {
+          showToast(notification.title || "Notification", notification.body || "");
+        } else {
+          alert((notification.title || "Notification") + "\n" + (notification.body || ""));
+        }
+        if (typeof startInventoryListener === 'function') startInventoryListener();
+        if (typeof startChatListener === 'function') startChatListener();
+        if (typeof startApprovalsListener === 'function') startApprovalsListener();
+      });
+
+      PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+        console.log("Push action performed: ", action);
+        const data = action.notification.data;
+        if (data && data.targetView) {
+          if (typeof setView === 'function') {
+            setView(data.targetView);
+            if (data.targetView === 'chat' && data.chatRecipient) {
+              setTimeout(() => {
+                if (typeof openConversation === 'function') {
+                  openConversation(data.chatRecipient);
+                }
+              }, 300);
+            }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.error("Error setting up push notifications:", e);
+  }
+}
+
+window.sendFCMNotification = function(targetEmail, title, body, targetView, extraData) {
+  console.log(`[Notification] To: ${targetEmail}, Title: ${title}, Body: ${body}`);
+  try {
+    if (typeof Capacitor !== 'undefined' && Capacitor.Plugins && Capacitor.Plugins.LocalNotifications) {
+      Capacitor.Plugins.LocalNotifications.schedule({
+        notifications: [{
+          title: title,
+          body: body,
+          id: Math.floor(Math.random() * 100000),
+          schedule: { at: new Date(Date.now() + 500) },
+          extra: { targetView: targetView || 'dashboard', ...extraData }
+        }]
+      });
+    }
+  } catch(e) {
+    console.warn("Local notification error:", e);
+  }
+};
+
+let items = [];
+let currentView = 'dashboard';
+  let appSettings = JSON.parse(localStorage.getItem('stem_settings')) || { schoolName: '', email: '', isAuthenticated: false };
+let filters = { category:'all', status:'all', search:'' };
+let sortState = { col:'assetTag', dir:'asc' };
+let storageMode = 'unknown';
+
+/* =====================================================
+   HELPERS
+===================================================== */
+function uid(){ return 'itm_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function mkItem(partial){
+  const now = new Date().toISOString();
+  return Object.assign({
+    id: uid(), name:'', category:'science', subcategory:'', assetTag:'', serialNumber:'',
+    quantity:1, unit:'Each', status:'Available', location:'',
+    minStock:0, cost:0, supplier:'', purchaseDate:'', warrantyExpiry:'', notes:'',
+    isLowStock: false,
+    dateAdded: now, lastUpdated: now
+  }, partial);
+}
+
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtMoney(n){
+  return 'GH&#8373; ' + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function badge(text, colorMap){
+  let key = text;
+  if (typeof text === 'string') {
+    if (text.endsWith('Broken')) key = 'Broken';
+    else if (text.endsWith('Lost')) key = 'Lost';
+    else if (text.endsWith('Low Stock')) key = 'Low Stock';
+    else if (text.endsWith('Avail')) key = 'Available';
+  }
+  const c = colorMap[key] || {bg:'#ECECEC', fg:'#666'};
+  return `<span class="badge" style="background:${c.bg};color:${c.fg}">${escapeHtml(text)}</span>`;
+}
+
+/* =====================================================
+   SEED DATA (All 91 Items + Estimated GHS Costs)
+===================================================== */
+function seedData(){
+  const now = new Date().toISOString();
+  const b = {dateAdded: now, lastUpdated: now, status: 'Available', isLowStock: false};
+  
+  const rawData = [
+    // SCIENCE (JS)
+    { t: 'JS1', n: 'Balance compression 2kg', c: 'science', sc: 'Measuring Instruments', q: 2, u: 'Each', p: 350 },
+    { t: 'JS2', n: 'Beaker Glass 100ml', c: 'science', sc: 'Lab Glassware', q: 20, u: 'Each', p: 30 },
+    { t: 'JS3', n: 'Beaker Plastic 250ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 25 },
+    { t: 'JS4', n: 'Beaker Plastic 500ml', c: 'science', sc: 'Lab Glassware', q: 5, u: 'Each', p: 35 },
+    { t: 'JS5', n: 'Conducting Thermal Rods', c: 'science', sc: 'Heating & Cooling', q: 5, u: 'Each', p: 120 },
+    { t: 'JS6', n: 'Conical Flask 100ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 35 },
+    { t: 'JS7', n: 'Dropping Pipettes Plastic', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 2 },
+    { t: 'JS8', n: 'Electricity Kit', c: 'engineering', sc: 'Electronic Components', q: 1, u: 'Each', p: 450 },
+    { t: 'JS9', n: 'Electronics Kit', c: 'engineering', sc: 'Electronic Components', q: 9, u: 'Each', p: 400 },
+    { t: 'JS10', n: 'Evaporating Dish', c: 'science', sc: 'General Lab Equipment', q: 5, u: 'Each', p: 45 },
+    { t: 'JS11', n: 'Filter Paper 12.5cm', c: 'science', sc: 'General Lab Equipment', q: 4, u: 'Pack', p: 80 },
+    { t: 'JS12', n: 'Funnel Filter Plastic', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 15 },
+    { t: 'JS13', n: 'Iron Filings', c: 'science', sc: 'Chemicals & Reagents', q: 4, u: 'Pack', p: 40 },
+    { t: 'JS14', n: 'JHS Mapped Science Activity Book', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'JS15', n: 'Leads Red/Black with Croc-clips', c: 'engineering', sc: 'Electronic Components', q: 20, u: 'Each', p: 15 },
+    { t: 'JS16', n: 'Litmus Paper - Blue', c: 'science', sc: 'Chemicals & Reagents', q: 5, u: 'Books', p: 20 },
+    { t: 'JS17', n: 'Litmus Paper - Red', c: 'science', sc: 'Chemicals & Reagents', q: 5, u: 'Books', p: 20 },
+    { t: 'JS18', n: 'Magnet Kit', c: 'science', sc: 'General Lab Equipment', q: 2, u: 'Pack', p: 180 },
+    { t: 'JS19', n: 'Magnets (Bar)', c: 'science', sc: 'General Lab Equipment', q: 20, u: 'Each', p: 40 },
+    { t: 'JS20', n: 'Masses 100g', c: 'science', sc: 'Measuring Instruments', q: 4, u: 'Set', p: 150 },
+    { t: 'JS21', n: 'Measuring Cylinder Plastic 100ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 35 },
+    { t: 'JS22', n: 'Measuring Cylinder Plastic 250ml', c: 'science', sc: 'Lab Glassware', q: 10, u: 'Each', p: 50 },
+    { t: 'JS23', n: 'Metal Rod Retort, Base, Clamp', c: 'science', sc: 'General Lab Equipment', q: 3, u: 'Set', p: 250 },
+    { t: 'JS24', n: 'Mirrors Kit', c: 'science', sc: 'Microscopes & Optics', q: 3, u: 'Set', p: 120 },
+    { t: 'JS25', n: 'Optical Pins', c: 'science', sc: 'Microscopes & Optics', q: 1, u: 'Pack', p: 30 },
+    { t: 'JS26', n: 'Petri Dish Plastic 90mm', c: 'science', sc: 'Lab Glassware', q: 20, u: 'Each', p: 10 },
+    { t: 'JS27', n: 'Ray Box & Lenses Kit', c: 'science', sc: 'Microscopes & Optics', q: 4, u: 'Each', p: 300 },
+    { t: 'JS28', n: 'Safety Goggles (Junior)', c: 'science', sc: 'Safety Equipment', q: 45, u: 'Each', p: 25 },
+    { t: 'JS29', n: 'Spatulas', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 15 },
+    { t: 'JS30', n: 'Spirit Burners', c: 'science', sc: 'Heating & Cooling', q: 10, u: 'Each', p: 45 },
+    { t: 'JS31', n: 'Spring Balances 1kg', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 60 },
+    { t: 'JS32', n: 'Spring Balances 500g', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 60 },
+    { t: 'JS33', n: 'Stirrer (Plastic, Hand)', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 10 },
+    { t: 'JS34', n: 'Stoppers Assorted', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Each', p: 150 },
+    { t: 'JS35', n: 'Stopwatch Digital', c: 'science', sc: 'Measuring Instruments', q: 10, u: 'Each', p: 80 },
+    { t: 'JS36', n: 'Syringes re-useable 10ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 5 },
+    { t: 'JS37', n: 'Syringes re-useable 20ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 8 },
+    { t: 'JS38', n: 'Syringes re-useable 2ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 3 },
+    { t: 'JS39', n: 'Syringes re-useable 5ml', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 4 },
+    { t: 'JS40', n: 'Test-tube Holder', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 25 },
+    { t: 'JS41', n: 'Test-tube Rack', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 45 },
+    { t: 'JS42', n: 'Test-tubes 16x100mm, Plastic with Lids', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 5 },
+    { t: 'JS43', n: 'Test-tubes 24x150mm, Glass', c: 'science', sc: 'Lab Glassware', q: 50, u: 'Each', p: 10 },
+    { t: 'JS44', n: 'Thermometer', c: 'science', sc: 'Measuring Instruments', q: 12, u: 'Each', p: 35 },
+    { t: 'JS45', n: 'Tongs', c: 'science', sc: 'General Lab Equipment', q: 5, u: 'Each', p: 30 },
+    { t: 'JS46', n: 'Transparent Tubing', c: 'science', sc: 'General Lab Equipment', q: 2, u: 'Roll', p: 40 },
+    { t: 'JS47', n: 'Stand with Wire Gauze for Spirit Burners', c: 'science', sc: 'Heating & Cooling', q: 10, u: 'Each', p: 60 },
+    { t: 'JS48', n: 'White Tile Spotted', c: 'science', sc: 'General Lab Equipment', q: 10, u: 'Each', p: 40 },
+
+    // CHEMICALS (JC)
+    { t: 'JC1', n: 'Aluminium Foil', c: 'science', sc: 'General Lab Equipment', q: 1, u: 'Roll', p: 50 },
+    { t: 'JC2', n: "Benedict's Solution (Qualitative)", c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500ml', p: 150 },
+    { t: 'JC3', n: 'Calcium Chloride (Anhydrous)', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 180 },
+    { t: 'JC4', n: 'Calcium Hydroxide', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250g', p: 120 },
+    { t: 'JC5', n: 'Copper Metal Turnings', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250g', p: 200 },
+    { t: 'JC6', n: 'Copper Sulphate', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 250 },
+    { t: 'JC7', n: 'Hydrochloric Acid (1 Molar)', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '2.5L', p: 350 },
+    { t: 'JC8', n: 'Iodine Solution', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500ml', p: 180 },
+    { t: 'JC9', n: 'Magnesium Ribbon', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '25g', p: 150 },
+    { t: 'JC10', n: 'Industrial denatured alcohol', c: 'science', sc: 'Chemicals & Reagents', q: 2, u: '1L', p: 120 },
+    { t: 'JC11', n: 'Sodium Hydrogen Carbonate', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '1KG', p: 150 },
+    { t: 'JC12', n: 'Sodium Hydroxide', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '1KG', p: 200 },
+    { t: 'JC13', n: 'Universal Indicator pH4 - 11', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '250ml', p: 180 },
+    { t: 'JC14', n: 'Zinc Metal', c: 'science', sc: 'Chemicals & Reagents', q: 1, u: '500g', p: 250 },
+
+    // MATH (JM)
+    { t: 'JM1', n: '100 Cards', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 45 },
+    { t: 'JM2', n: '360 Degree Protractor', c: 'math', sc: 'Geometry Sets', q: 45, u: 'Each', p: 15 },
+    { t: 'JM3', n: 'Calculator (4 function)', c: 'math', sc: 'Calculators', q: 45, u: 'Each', p: 60 },
+    { t: 'JM4', n: 'Counters', c: 'math', sc: 'Manipulatives & Models', q: 1, u: 'Pack', p: 150 },
+    { t: 'JM5', n: 'Dice Multi (4,8,10,12,20 sides)', c: 'math', sc: 'Manipulatives & Models', q: 15, u: 'Pack', p: 80 },
+    { t: 'JM6', n: 'Dice numeral', c: 'math', sc: 'Manipulatives & Models', q: 100, u: 'Each', p: 5 },
+    { t: 'JM7', n: 'Dice operator', c: 'math', sc: 'Manipulatives & Models', q: 45, u: 'Each', p: 5 },
+    { t: 'JM8', n: 'Geared Compasses', c: 'math', sc: 'Geometry Sets', q: 45, u: 'Each', p: 25 },
+    { t: 'JM9', n: 'GeoBoards (12x12) and Rubber Bands', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Each', p: 80 },
+    { t: 'JM10', n: 'Geometric Solids (19 piece)', c: 'math', sc: 'Manipulatives & Models', q: 1, u: 'Set', p: 250 },
+    { t: 'JM11', n: 'Geometry Builder Kit', c: 'math', sc: 'Geometry Sets', q: 9, u: 'Pack', p: 350 },
+    { t: 'JM12', n: 'GridLines Card Game', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 90 },
+    { t: 'JM13', n: 'JHS Mapped Mathematics Activity Book', c: 'math', sc: 'General Math Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'JM14', n: 'Large Plastic Storage Boxes', c: 'math', sc: 'General Math Equipment', q: 10, u: 'Each', p: 120 },
+    { t: 'JM15', n: 'Mini Chalk Slate', c: 'math', sc: 'General Math Equipment', q: 45, u: 'Each', p: 35 },
+    { t: 'JM16', n: 'Ruler 30cm', c: 'math', sc: 'Measuring Tools', q: 45, u: 'Each', p: 5 },
+    { t: 'JM17', n: 'Sand Timers', c: 'math', sc: 'Measuring Tools', q: 15, u: 'Each', p: 40 },
+    { t: 'JM18', n: 'Scissors (12RH/3LH)', c: 'math', sc: 'General Math Equipment', q: 15, u: 'Each', p: 15 },
+    { t: 'JM19', n: 'Tape Measure', c: 'math', sc: 'Measuring Tools', q: 15, u: 'Each', p: 10 },
+    { t: 'JM20', n: 'Target Maths Card Game Packs', c: 'math', sc: 'Manipulatives & Models', q: 9, u: 'Pack', p: 120 },
+    { t: 'JM21', n: 'Teacher Board Equipment', c: 'math', sc: 'General Math Equipment', q: 1, u: 'Each', p: 250 },
+
+    // ICT & ENGINEERING (ICT)
+    { t: 'ICT1', n: 'Projector', c: 'it', sc: 'Projectors & Displays', q: 1, u: 'Each', p: 4500 },
+    { t: 'ICT2', n: 'Laptop', c: 'it', sc: 'Computers & Laptops', q: 1, u: 'Each', p: 7000 },
+    { t: 'ICT2b', n: 'Speaker', c: 'it', sc: 'Peripherals & Accessories', q: 1, u: 'Each', p: 300 },
+    { t: 'ICT3', n: 'Warranty (ICT1 & ICT2)', c: 'it', sc: 'General Engineering Equipment', q: 1, u: 'Each', p: 500 },
+    { t: 'ICT4', n: 'Programming Portal', c: 'it', sc: 'Software Licenses', q: 1, u: 'Each', p: 200 },
+    { t: 'ICT5', n: 'Robotics Educational Robot', c: 'engineering', sc: 'Robotics Kits', q: 1, u: 'Set', p: 1500 },
+    { t: 'ICT6', n: 'Datalogging Sensors', c: 'engineering', sc: 'Testing & Measurement Equipment', q: 1, u: 'Set', p: 800 },
+    { t: 'ICT7', n: 'JHS Mapped Tech & Engineering Book', c: 'engineering', sc: 'General Engineering Equipment', q: 1, u: 'Each', p: 100 },
+    { t: 'ICT8', n: 'Batteries and Charger', c: 'engineering', sc: 'Electronic Components', q: 1, u: 'Set', p: 250 }
+  ];
+
+  return rawData.map(item => mkItem(Object.assign({}, b, {
+    name: item.n,
+    category: item.c,
+    subcategory: item.sc,
+    assetTag: item.t,
+    quantity: item.q,
+    unit: item.u,
+    cost: item.p,
+    cost: item.p,
+    location: ''
+  })));
+}
+
+/* =====================================================
+   VIEW LOGIC
+===================================================== */
+async function loadItems(){
+  try{
+    const result = localStorage.getItem(STORAGE_KEY);
+    if (result){
+      items = JSON.parse(result);
+    } else {
+      items = seedData();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+    storageMode = 'persistent';
+  } catch(e){
+    items = seedData();
+    storageMode = 'memory';
+  }
+}
+
+let inventoryUnsubscribe = null;
+async function fetchInventory() {
+  if (!databases || !appSettings.schoolName) return;
+  try {
+    const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', appSettings.schoolName)]);
+    if (snap.documents.length > 0) {
+      const data = snap.documents[0];
+      appSettings.schoolDocId = data.$id;
+      let cloudItems = [];
+      try {
+        cloudItems = typeof data.items === 'string' ? JSON.parse(data.items) : (data.items || []);
+      } catch(e) { cloudItems = []; }
+      if (cloudItems && cloudItems.length > 0) {
+        items = cloudItems;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        if (currentView === 'dashboard' || currentView === 'inventory' || currentView === 'approvals') {
+          render();
+        }
+      }
+    }
+  } catch(e) {
+    console.error("Inventory fetch error:", e);
+  }
+}
+
+function startInventoryListener() {
+  if (!appSettings.schoolName) return;
+  fetchInventory();
+  if (client) {
+    if (inventoryUnsubscribe) { inventoryUnsubscribe(); inventoryUnsubscribe = null; }
+    inventoryUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.SCHOOLS}.documents`, response => {
+      if (response.payload && (response.payload.schoolName === appSettings.schoolName || response.payload.email === appSettings.email)) {
+        let cloudItems = [];
+        try {
+          cloudItems = typeof response.payload.items === 'string' ? JSON.parse(response.payload.items) : (response.payload.items || []);
+        } catch(e) { cloudItems = []; }
+        if (cloudItems) {
+          items = cloudItems;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+          if (currentView === 'dashboard' || currentView === 'inventory' || currentView === 'approvals') {
+            render();
+          }
+        }
+      }
+    });
+  }
+}
+
+async function saveItems(){
+  if (storageMode !== 'persistent') { renderStorageNotice(); return; }
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    
+    // Auto-Sync to Appwrite in the background if authenticated
+    if (databases && appSettings.isAuthenticated && appSettings.schoolName) {
+      const docId = appSettings.schoolDocId;
+      if (docId) {
+        databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, docId, {
+          items: JSON.stringify(items),
+          lastSync: new Date().toISOString()
+        }).catch(err => console.error("Auto-sync failed:", err));
+      } else {
+        const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', appSettings.schoolName)]);
+        if (snap.documents.length > 0) {
+          appSettings.schoolDocId = snap.documents[0].$id;
+          databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, snap.documents[0].$id, {
+            items: JSON.stringify(items),
+            lastSync: new Date().toISOString()
+          }).catch(err => console.error("Auto-sync failed:", err));
+        }
+      }
+    }
+  } catch(e){
+    storageMode = 'memory';
+    renderStorageNotice();
+  }
+}
+
+/* =====================================================
+   RENDERING
+===================================================== */
+function render(){
+  renderSidebar();
+  renderView();
+  if (typeof updateChatBadge === 'function') {
+    updateChatBadge();
+  }
+}
+
+function renderSidebar(){
+  const nav = document.getElementById('categoryNav');
+  let html = `<button class="category-nav-item ${currentView==='inventory' && filters.category==='all' ? 'active':''}" data-action="filter-category" data-cat="all">
+      <span class="category-dot" style="background:var(--ink-soft)"></span>
+      <span>All categories</span>
+      <span class="count">${items.length}</span>
+    </button>`;
+  for (const [key, cat] of Object.entries(CATEGORIES)){
+    const count = items.filter(i=>i.category===key).length;
+    const active = currentView==='inventory' && filters.category===key;
+    html += `<button class="category-nav-item ${active?'active':''}" data-action="filter-category" data-cat="${key}">
+      <span class="category-dot" style="background:${cat.color}"></span>
+      <span>${cat.short}</span>
+      <span class="count">${count}</span>
+    </button>`;
+  }
+  nav.innerHTML = html;
+
+  document.querySelectorAll('.nav-item, .bottom-nav-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.view === currentView);
+  });
+
+  renderStorageNotice();
+}
+
+function renderStorageNotice(){
+  const el = document.getElementById('storageNotice');
+  if (storageMode === 'memory'){
+    el.hidden = false;
+    el.innerHTML = "<strong>Warning:</strong> Private browsing or restricted storage detected. Changes will not be saved across sessions. Use <em>Export backup</em> to keep your data.";
+  } else {
+    el.hidden = true;
+  }
+}
+
+function renderView(){
+  window.scrollTo(0, 0);
+  const root = document.getElementById('view');
+  root.classList.remove('page-fade-in');
+  void root.offsetWidth; // trigger reflow to restart animation
+  root.classList.add('page-fade-in');
+  
+  // Hide navbar topbar on login/register
+  const topbar = document.querySelector('.topbar');
+  const bottomNav = document.querySelector('.bottom-nav');
+  const fab = document.querySelector('.fab');
+  const isAuthView = (currentView === 'login');
+  const isChatView = (currentView === 'chat');
+  const isApprovalsView = (currentView === 'approvals');
+  const isSettingsView = (currentView === 'settings');
+  if (topbar) topbar.style.display = (isAuthView || isChatView || isApprovalsView || isSettingsView) ? 'none' : 'flex';
+  if (bottomNav) bottomNav.style.display = isAuthView ? 'none' : 'flex';
+  if (fab) fab.style.display = (isAuthView || isChatView || isApprovalsView || isSettingsView) ? 'none' : 'flex';
+
+  if (currentView === 'dashboard') {
+    root.innerHTML = dashboardHTML();
+  } else if (currentView === 'settings') {
+    root.innerHTML = settingsHTML();
+  } else if (currentView === 'login') {
+    root.innerHTML = loginHTML();
+  } else if (currentView === 'chat') {
+    root.innerHTML = chatListViewHTML();
+  } else if (currentView === 'approvals') {
+    root.innerHTML = approvalsHTML();
+  } else if (currentView === 'schoolPicker') {
+    root.innerHTML = schoolPickerHTML(window.availableSchools || []);
+  } else {
+    root.innerHTML = inventoryHTML();
+  }
+}
+
+/* ---------- UI Helpers ---------- */
+window.togglePassword = function(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.28 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+    }
+};
+
+function schoolPickerHTML(schools) {
+    let options = schools.map(s => `<div class="clickable-card" style="padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px;" onclick="selectSchoolProfile('${s.id}')"><strong>${escapeHtml(s.id)}</strong><br><small style="color:var(--ink-soft);">${escapeHtml(s.email)}</small></div>`).join('');
+    return `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:20px;">
+        <div style="text-align:center; margin-bottom:24px;">
+          <h1 style="font-size:24px; color:var(--primary);">Select Your School</h1>
+          <p style="color:var(--ink-soft); margin:0;">Multiple profiles found for this email.</p>
+        </div>
+        <div style="width:100%; max-width:320px; background:var(--surface); padding:24px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05); border:1px solid var(--border);">
+            ${options}
+        </div>
+      </div>
+    `;
+}
+
+window.selectSchoolProfile = function(schoolName) {
+    appSettings.schoolName = schoolName;
+    localStorage.setItem('stem_settings', JSON.stringify(appSettings));
+    if (window.fcmTokenValue) saveFCMTokenToDatabase(window.fcmTokenValue);
+    startInventoryListener();
+    startChatListener();
+    startApprovalsListener();
+    currentView = 'dashboard';
+    render();
+};
+
+/* ---------- Dashboard ---------- */
+
+    function settingsHTML(){
+      const photo = appSettings.photoUrl;
+      const avatarHTML = photo ?
+        `<img src="${photo}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); cursor:pointer;" onclick="document.getElementById('settingsPhotoInput').click();" />` :
+        `<div class="chat-avatar" style="width:80px; height:80px; font-size:28px; background:var(--primary-soft); color:var(--primary); font-weight:700; margin:0 auto; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer;" onclick="document.getElementById('settingsPhotoInput').click();">${getInitials(appSettings.schoolName || 'S')}</div>`;
+
+      return `
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-subtitle">Account Management</p>
+          </div>
+        </div>
+        <div style="max-width:400px; margin:24px auto;">
+          <div style="background:var(--surface); padding:24px; border-radius:12px; border:1px solid var(--border);">
+            <div style="text-align:center; margin-bottom: 24px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+              ${avatarHTML}
+              <input type="file" id="settingsPhotoInput" accept="image/*" style="display:none;" onchange="handleSettingsPhotoUpload(event)">
+              <button class="btn btn-ghost" style="font-size:12px; padding:4px 12px; border:1px solid var(--border);" onclick="document.getElementById('settingsPhotoInput').click();">Upload Photo</button>
+            </div>
+            
+            <div style="text-align:center; margin-bottom: 20px; padding-top:16px; border-top:1px solid var(--border);">
+              <h3 style="margin:8px 0 4px 0; color:var(--ink);">Appwrite Cloud Connected</h3>
+              <p style="font-size:12px; color:var(--ink-soft); margin:0;">Your data is securely synced to Appwrite Databases.</p>
+            </div>
+            
+            <h3 style="margin:24px 0 12px 0; padding-top:24px; border-top:1px solid var(--border);">Account</h3>
+            <p style="font-size:13px; color:var(--ink-soft); margin-bottom:12px;">Logged in as: <strong>${escapeHtml(appSettings.schoolName)}</strong></p>
+            <button class="btn btn-ghost" data-action="logout" style="width:100%; color:var(--danger); border:1px solid var(--danger-soft);">Log Out Device</button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.handleSettingsPhotoUpload = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 150;
+          const MAX_HEIGHT = 150;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+          db.collection('schools').doc(appSettings.schoolName).update({
+            photoUrl: dataUrl
+          }).then(() => {
+            appSettings.photoUrl = dataUrl;
+            localStorage.setItem('stem_settings', JSON.stringify(appSettings));
+            alert("Profile photo updated successfully!");
+            renderView();
+          }).catch(err => {
+            console.error("Error updating photoUrl: ", err);
+            alert("Error updating profile photo: " + err.message);
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+  function loginHTML(){
+    return `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:20px; background: url('login_bg.jpg') no-repeat center center/cover; position: relative;">
+        <!-- Backdrop overlay to darken/soften the image slightly -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.45); z-index: 1;"></div>
+        
+        <div style="position: relative; z-index: 2; width: 100%; max-width: 360px; padding: 32px 28px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.25); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); color: #ffffff; text-align: center;">
+          
+          <div style="margin-bottom: 28px;">
+            <h1 style="font-size: 32px; font-weight: 700; margin: 0 0 8px 0; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-family: var(--font-display);">Stem Ledger</h1>
+            <p style="color: rgba(255, 255, 255, 0.85); margin: 0; font-size: 14px;">Welcome back to your school's inventory.</p>
+          </div>
+          
+          <form id="loginForm" style="display: flex; flex-direction: column; gap: 18px; text-align: left;">
+            <div class="field" style="display: flex; flex-direction: column; gap: 6px; background: transparent; border: none; box-shadow: none; padding: 0; margin: 0;">
+              <label style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9);">Email Address</label>
+              <input type="email" id="loginEmail" required placeholder="Enter email" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='rgba(255, 255, 255, 0.6)'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.2)'">
+            </div>
+            <div class="field" style="display: flex; flex-direction: column; gap: 6px; position: relative; background: transparent; border: none; box-shadow: none; padding: 0; margin: 0;">
+              <label style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.9);">Master Password</label>
+              <input type="password" id="loginPassword" required placeholder="Enter password" style="background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 12px; padding-right: 40px; color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%;" onfocus="this.style.borderColor='rgba(255, 255, 255, 0.6)'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.2)'">
+              <button type="button" class="pwd-toggle" id="toggleLoginPwd" onclick="togglePassword('loginPassword', 'toggleLoginPwd')" style="position: absolute; right: 8px; top: 32px; background: none; border: none; color: rgba(255, 255, 255, 0.7); cursor: pointer; padding: 4px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              </button>
+            </div>
+            <button type="submit" class="btn primary" style="width: 100%; margin-top: 12px; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 8px; background: #ffffff; color: #1c2d5e; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s;" onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='#ffffff'" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">Log In</button>
+            <div id="loginError" style="color: #ff8a80; font-size: 13px; text-align: center; margin-top: 8px; display: none;">Login failed, incorrect username/password</div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  async function syncToCloud() {
+    if (!appSettings.schoolName || !appSettings.isAuthenticated) {
+      alert("You must be logged in to sync.");
+      return;
+    }
+    const btn = document.getElementById('syncToCloudBtn');
+    if (btn) btn.textContent = 'Syncing...';
+    try {
+      if (!databases) throw new Error("Appwrite is not initialized");
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', appSettings.schoolName)]);
+      if (snap.documents.length > 0) {
+        await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, snap.documents[0].$id, {
+          items: JSON.stringify(items),
+          lastSync: new Date().toISOString()
+        });
+      } else {
+        await databases.createDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, ID.unique(), {
+          schoolName: appSettings.schoolName,
+          email: appSettings.email,
+          items: JSON.stringify(items),
+          lastSync: new Date().toISOString()
+        });
+      }
+      alert("Successfully synced to Appwrite Cloud!");
+    } catch(e) {
+      console.error(e);
+      alert("Sync failed: " + e.message);
+    }
+    if (btn) btn.textContent = 'Sync to Cloud';
+  }
+
+  async function syncFromCloud() {
+    if (!appSettings.schoolName || !appSettings.isAuthenticated) {
+      alert("You must be logged in to sync.");
+      return;
+    }
+    const btn = document.getElementById('syncFromCloudBtn');
+    if (btn) btn.textContent = 'Downloading...';
+    try {
+      if (!databases) throw new Error("Appwrite is not initialized");
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', appSettings.schoolName)]);
+      if (snap.documents.length > 0) {
+        const data = snap.documents[0];
+        let cloudItems = [];
+        try {
+          cloudItems = typeof data.items === 'string' ? JSON.parse(data.items) : (data.items || []);
+        } catch(e) { cloudItems = []; }
+        if (cloudItems && cloudItems.length > 0) {
+          items = cloudItems;
+          saveItems();
+          render();
+          alert("Successfully downloaded from Appwrite Cloud!");
+        } else {
+          alert("No inventory data found in the cloud for this school.");
+        }
+      } else {
+        alert("No cloud profile found for this school. Try syncing to cloud first.");
+      }
+    } catch(e) {
+      console.error(e);
+      alert("Download failed: " + e.message);
+    }
+    if (btn) btn.textContent = 'Download from Cloud';
+  }
+  
+function dashboardHTML(){
+  const totalItems = items.length;
+  const totalQty = items.reduce((s,i)=>s+Number(i.quantity||0),0);
+  
+  // Update: Calculate aggregate quantities for Available, Broken, Lost
+  const availableValue = items.reduce((s,i) => {
+    const avail = Number(i.quantity||0) - Number(i.brokenQty||0) - Number(i.lostQty||0) - Number(i.lowStockQty||0) - Number(i.borrowedQty||0);
+    return s + (avail * Number(i.cost||0));
+  }, 0);
+  const totalValue = availableValue;
+  
+  const lowStock = items.filter(i=> (Number(i.minStock||0)>0 && (Number(i.quantity||0) - Number(i.brokenQty||0) - Number(i.lostQty||0) - Number(i.lowStockQty||0) - Number(i.borrowedQty||0))<=Number(i.minStock)) || i.isLowStock || Number(i.lowStockQty||0) > 0);
+  
+  const availableItems = items.filter(i => (Number(i.quantity||0) - Number(i.brokenQty||0) - Number(i.lostQty||0) - Number(i.lowStockQty||0) - Number(i.borrowedQty||0)) > 0);
+  const brokenItems = items.filter(i => Number(i.brokenQty||0) > 0);
+  const lostItems = items.filter(i => Number(i.lostQty||0) > 0);
+  const lowStockItems = items.filter(i => Number(i.lowStockQty||0) > 0);
+  const needsRepairItems = items.filter(i => i.status === 'Needs Repair'); // Legacy support
+
+  const catCounts = Object.keys(CATEGORIES).map(k=>({key:k, count: items.filter(i=>i.category===k).length}));
+  const total = catCounts.reduce((s,c)=>s+c.count,0);
+  let acc = 0;
+  let gradient = 'var(--surface-2) 0% 100%';
+  if (total > 0){
+    gradient = catCounts.map(c=>{
+      const start = acc/total*100;
+      acc += c.count;
+      const end = acc/total*100;
+      return `${CATEGORIES[c.key].color} ${start}% ${end}%`;
+    }).join(', ');
+  }
+
+  const attentionItems = [
+    ...brokenItems.map(i=>({item:i, reason:`${i.brokenQty} Broken`})),
+    ...lostItems.map(i=>({item:i, reason:`${i.lostQty} Lost`})),
+    ...lowStockItems.map(i=>({item:i, reason:`${i.lowStockQty} Low Stock`})),
+    ...needsRepairItems.map(i=>({item:i, reason:'Needs Repair'}))
+  ];
+
+  const photo = appSettings.photoUrl;
+  return `
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h1 class="page-title">${appSettings.schoolName ? escapeHtml(appSettings.schoolName) : 'Dashboard'}</h1>
+        <p class="page-subtitle">${appSettings.email ? escapeHtml(appSettings.email) : 'Overview of equipment'}</p>
+        <div style="margin-top: 12px; font-weight: 600; font-size: 16px; display:flex; align-items:center; gap:8px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:var(--accent);"></span>
+          Total Assets: ${totalItems}
+        </div>
+      </div>
+      ${photo ?
+        `<img src="${photo}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:2px solid var(--border);" />` :
+        `<div class="chat-avatar" style="width:54px; height:54px; font-size:20px; background:var(--accent-soft); color:var(--accent); font-weight:700; display:flex; align-items:center; justify-content:center; border-radius:50%;">${getInitials(appSettings.schoolName || 'DB')}</div>`
+      }
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="all" style="background: linear-gradient(135deg, rgba(33,150,243,0.1), rgba(33,150,243,0.02)); border-color: rgba(33,150,243,0.3);">
+        <div class="stat-label" style="color: #1976D2;">Line items</div>
+        <div class="stat-value" style="color: #1976D2;">${totalItems}</div>
+        <div class="stat-meta" style="color: #1976D2; opacity:0.8;">${totalQty.toLocaleString()} units total</div>
+      </div>
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="all" style="background: linear-gradient(135deg, rgba(156,39,176,0.1), rgba(156,39,176,0.02)); border-color: rgba(156,39,176,0.3);">
+        <div class="stat-label" style="margin-bottom:2px; color: #7B1FA2;">Estimated value</div>
+        <div style="font-size:12px; color:#7B1FA2; opacity:0.7; margin-bottom:6px;">Total Value: ${fmtMoney(totalValue)}</div>
+        <div class="stat-value" style="color: #7B1FA2;">${fmtMoney(availableValue)}</div>
+        <div class="stat-meta" style="color: #7B1FA2; opacity:0.8;">Available Value</div>
+      </div>
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="lowstock" style="background: linear-gradient(135deg, rgba(255,152,0,0.15), rgba(255,152,0,0.02)); border-color: rgba(255,152,0,0.4);">
+        <div class="stat-label" style="color: #E65100;">Low stock alerts</div>
+        <div class="stat-value" style="color: #E65100;">${lowStock.length}</div>
+        <div class="stat-meta" style="color: #E65100; opacity:0.8;">At/below minimum or manually flagged</div>
+      </div>
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="available" style="background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(76,175,80,0.02)); border-color: rgba(76,175,80,0.4);">
+        <div class="stat-label" style="color: #2E7D32;">Available</div>
+        <div class="stat-value" style="color: #2E7D32;">${availableItems.length}</div>
+        <div class="stat-meta" style="color: #2E7D32; opacity:0.8;">Ready for use</div>
+      </div>
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="broken" style="background: linear-gradient(135deg, rgba(244,67,54,0.15), rgba(244,67,54,0.02)); border-color: rgba(244,67,54,0.4);">
+        <div class="stat-label" style="color: #C62828;">Broken</div>
+        <div class="stat-value" style="color: #C62828;">${brokenItems.length}</div>
+        <div class="stat-meta" style="color: #C62828; opacity:0.8;">Requires action</div>
+      </div>
+      <div class="stat-card clickable-card" data-action="dashboard-drilldown" data-type="lost" style="background: linear-gradient(135deg, rgba(158,158,158,0.15), rgba(158,158,158,0.02)); border-color: rgba(158,158,158,0.4);">
+        <div class="stat-label" style="color: #424242;">Lost</div>
+        <div class="stat-value" style="color: #424242;">${lostItems.length}</div>
+        <div class="stat-meta" style="color: #424242; opacity:0.8;">Missing inventory</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <h3>Items by category</h3>
+        <div class="donut-row">
+          <div class="donut" style="background:conic-gradient(${gradient})">
+            <div class="donut-center">
+              <div class="num">${totalItems}</div>
+              <div class="lbl">Items</div>
+            </div>
+          </div>
+          <div class="legend">
+            ${Object.entries(CATEGORIES).map(([k,c])=>`
+              <div class="legend-item clickable-row" data-action="dashboard-drilldown" data-type="category" data-category="${k}" style="padding:4px; border-radius:4px; margin-bottom:4px;">
+                <span class="category-dot" style="background:${c.color}"></span>
+                <span class="legend-name">${c.label}</span>
+                <span class="legend-count">${items.filter(i=>i.category===k).length}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Needs attention</h3>
+                ${attentionItems.length === 0
+          ? '<p class="empty-note">Nothing needs attention right now &mdash; all items are within their normal levels.</p>'
+          : `<div class="attention-list">${attentionItems.slice(0,8).map(({item,reason})=>`
+              <div class="attention-item">
+                <span class="category-dot" style="background:${CATEGORIES[item.category].color}"></span>
+                <div style="flex:1;">
+                  <div class="att-name">${escapeHtml(item.name)}</div>
+                  <div class="att-reason">${escapeHtml(reason)}</div>
+                  <div style="display:flex; gap:4px;">
+                    <a href="https://www.alibaba.com/trade/search?SearchText=${encodeURIComponent(item.name)}" target="_blank" class="btn" style="background:#FF6A00; color:white; font-size:11px; padding:4px 8px; text-decoration:none;">Alibaba</a>
+                    <button class="icon-btn" data-action="view-item" data-id="${item.id}">View</button>
+                    <button class="icon-btn" data-action="edit-item" data-id="${item.id}">Edit</button>
+                  </div>
+                </div>
+              </div>`).join('')}</div>`}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Inventory ---------- */
+function inventoryHTML(){
+  let list = items.filter(i=>{
+    if (filters.category!=='all' && i.category!==filters.category) return false;
+    
+    // New status filter logic using numerical fields
+    if (filters.status !== 'all') {
+      if (filters.status === 'Broken' && (i.brokenQty || 0) === 0) return false;
+      if (filters.status === 'Lost' && (i.lostQty || 0) === 0) return false;
+      if (filters.status === 'LowStock' && (i.lowStockQty || 0) === 0) return false;
+      if (filters.status === 'Available' && (i.quantity - (i.brokenQty||0) - (i.lostQty||0) - (i.lowStockQty||0)) <= 0) return false;
+      if (filters.status === 'Maintenance' && i.status !== 'Maintenance') return false; // Legacy fallback if needed
+    }
+
+    if (filters.search){
+      const s = filters.search.toLowerCase();
+      const haystack = [i.name,i.assetTag,i.serialNumber,i.location,i.supplier].join(' ').toLowerCase();
+      if (!haystack.includes(s)) return false;
+    }
+    return true;
+  });
+
+  list = sortItems(list);
+
+  return `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Inventory</h1>
+        <p class="page-subtitle">${list.length} of ${items.length} item${items.length===1?'':'s'} shown</p>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <button class="pill ${filters.category==='all'?'active':''}" data-action="filter-category" data-cat="all">All</button>
+      ${Object.entries(CATEGORIES).map(([k,c])=>`<button class="pill ${filters.category===k?'active':''}" data-action="filter-category" data-cat="${k}">${c.short}</button>`).join('')}
+      <select class="select-sm" id="statusFilter">
+        <option value="all">All statuses</option>
+        <option value="Available" ${filters.status==='Available'?'selected':''}>Available</option>
+        <option value="Broken" ${filters.status==='Broken'?'selected':''}>Broken</option>
+        <option value="Lost" ${filters.status==='Lost'?'selected':''}>Lost</option>
+        <option value="LowStock" ${filters.status==='LowStock'?'selected':''}>Low Stock</option>
+      </select>
+    </div>
+
+    <div class="table-wrap" style="background:transparent; border:none; box-shadow:none; overflow:visible;">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${list.length===0
+          ? `<div class="empty-note" style="padding:20px; text-align:center; background:var(--surface); border-radius:var(--radius); border:1px solid var(--border);">No items match these filters.</div>`
+          : list.map(i=>{
+              const avail = i.quantity - (i.brokenQty||0) - (i.lostQty||0) - (i.lowStockQty||0);
+              let statusBadges = '';
+              if (avail > 0) statusBadges += badge(avail + ' Avail', STATUS_COLORS) + ' ';
+              if ((i.brokenQty||0) > 0) statusBadges += badge(i.brokenQty + ' Broken', STATUS_COLORS) + ' ';
+              if ((i.lostQty||0) > 0) statusBadges += badge(i.lostQty + ' Lost', STATUS_COLORS) + ' ';
+              if ((i.lowStockQty||0) > 0) statusBadges += badge(i.lowStockQty + ' Low Stock', STATUS_COLORS) + ' ';
+              if (!statusBadges) statusBadges = badge('0 Avail', STATUS_COLORS);
+
+              return `
+            <div class="compact-list-item" data-action="view-item" data-id="${i.id}" style="border-left-color:${CATEGORIES[i.category].color}">
+              <div class="row-top">
+                <span class="item-name">${escapeHtml(i.name)}</span>
+                <span class="item-qty">${i.quantity} ${escapeHtml(i.unit||'')} Total</span>
+                <span class="item-status">${statusBadges}</span>
+              </div>
+              <div class="row-bottom">
+                <span class="item-cat">${CATEGORIES[i.category].label}</span>
+                <span class="item-tag">${escapeHtml(i.assetTag||'--')}</span>
+                <span class="item-cost">${fmtMoney(i.cost)}/unit</span>
+              </div>
+            </div>
+          `}).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function sortItems(list){
+  const {col, dir} = sortState;
+  const mult = dir==='asc' ? 1 : -1;
+  return [...list].sort((a,b)=>{
+    if (col==='quantity') return (Number(a.quantity)-Number(b.quantity))*mult;
+    if (col==='cost') return (Number(a.cost)-Number(b.cost))*mult;
+    let av, bv;
+    if (col==='category'){ av=CATEGORIES[a.category].label; bv=CATEGORIES[b.category].label; }
+    else if (col==='assetTag'){ 
+        return a.assetTag.localeCompare(b.assetTag, undefined, {numeric: true}) * mult;
+    }
+    else { av=a[col]; bv=b[col]; }
+    av = String(av??'').toLowerCase();
+    bv = String(bv??'').toLowerCase();
+    if (av<bv) return -1*mult;
+    if (av>bv) return 1*mult;
+    return 0;
+  });
+}
+
+/* =====================================================
+   MODAL / FORM
+===================================================== */
+function openModal(id){
+  const item = id ? items.find(i=>i.id===id) : null;
+  document.getElementById('modal').innerHTML = formHTML(item);
+  document.getElementById('modalOverlay').hidden = false;
+
+  
+
+  
+  document.getElementById('modalForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    saveItemFromForm(id);
+  });
+
+  setTimeout(()=>{ const el = document.getElementById('nameInput'); if (el) el.focus(); }, 50);
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').hidden = true;
+  document.getElementById('modal').innerHTML = '';
+}
+window.closeModal = closeModal;
+
+function formHTML(item){
+  const isEdit = !!item;
+  return `
+    <div class="modal-header">
+      <h3>${isEdit ? 'Edit item' : 'Add new item'}</h3>
+      <button class="close-btn" type="button" data-action="close-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="modalForm">
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="nameInput">Item name *</label>
+            <input id="nameInput" required value="${escapeHtml(item?.name||'')}" placeholder="e.g. Digital Oscilloscope" />
+          </div>
+          <div class="field">
+            <label for="categorySelect">Category *</label>
+            <select id="categorySelect">
+              ${Object.entries(CATEGORIES).map(([k,c])=>`<option value="${k}" ${item?.category===k?'selected':''}>${c.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label for="subcategoryInput">Subcategory</label>
+            <input id="subcategoryInput" list="subcategoryOptions" value="${escapeHtml(item?.subcategory||'')}" placeholder="e.g. Measuring Instruments" />
+            
+          </div>
+          <div class="field">
+            <label for="quantityInput">Total Quantity *</label>
+            <input id="quantityInput" type="number" min="0" step="1" required value="${item?.quantity ?? 1}" />
+          </div>
+          <div class="field">
+            <label for="unitInput">Unit</label>
+            <input id="unitInput" list="unitOptions" value="${escapeHtml(item?.unit||'Each')}" />
+            <datalist id="unitOptions">${UNITS.map(u=>`<option value="${u}"></option>`).join('')}</datalist>
+          </div>
+          <div class="field" style="background:#fff3f3; padding:8px; border-radius:4px; border:1px solid #ffcdd2;">
+            <label for="brokenQtyInput" style="color:#C62828;">Broken Quantity</label>
+            <input id="brokenQtyInput" type="number" min="0" step="1" value="${item?.brokenQty ?? 0}" />
+          </div>
+          <div class="field" style="background:#fff3f3; padding:8px; border-radius:4px; border:1px solid #ffcdd2;">
+            <label for="lostQtyInput" style="color:#C62828;">Lost Quantity</label>
+            <input id="lostQtyInput" type="number" min="0" step="1" value="${item?.lostQty ?? 0}" />
+          </div>
+          <div class="field" style="background:#fff3f3; padding:8px; border-radius:4px; border:1px solid #ffcdd2;">
+            <label for="lowStockQtyInput" style="color:#C62828;">Low Stock Quantity</label>
+            <input id="lowStockQtyInput" type="number" min="0" step="1" value="${item?.lowStockQty ?? 0}" />
+          </div>
+          <div class="field full">
+            <label for="locationInput">Location</label>
+            <input id="locationInput" value="${escapeHtml(item?.location||'')}" placeholder="e.g. Science Lab 2, Shelf B" />
+          </div>
+          <div class="field">
+            <label for="assetTagInput">Asset tag</label>
+            <input id="assetTagInput" value="${escapeHtml(item?.assetTag||'')}" placeholder="e.g. SCI-0012" />
+          </div>
+          <div class="field">
+            <label for="serialInput">Serial number</label>
+            <input id="serialInput" value="${escapeHtml(item?.serialNumber||'')}" />
+          </div>
+          <div class="field">
+            <label for="minStockInput">Minimum stock level</label>
+            <input id="minStockInput" type="number" min="0" step="1" value="${item?.minStock ?? 0}" />
+          </div>
+          <div class="field">
+            <label for="costInput">Unit cost (GH&#8373;)</label>
+            <input id="costInput" type="number" min="0" step="0.01" value="${item?.cost ?? 0}" />
+          </div>
+          <div class="field">
+            <label for="purchaseDateInput">Purchase date</label>
+            <input id="purchaseDateInput" type="date" value="${item?.purchaseDate||''}" />
+          </div>
+          <div class="field">
+            <label for="warrantyInput">Warranty expiry</label>
+            <input id="warrantyInput" type="date" value="${item?.warrantyExpiry||''}" />
+          </div>
+          <div class="field full">
+            <label for="supplierInput">Supplier / Vendor</label>
+            <input id="supplierInput" value="${escapeHtml(item?.supplier||'')}" />
+          </div>
+          <div class="field full">
+            <label for="notesInput">Notes</label>
+            <textarea id="notesInput">${escapeHtml(item?.notes||'')}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-action="close-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">${isEdit ? 'Save changes' : 'Add item'}</button>
+      </div>
+    </form>
+  `;
+}
+
+async function saveItemFromForm(id){
+  const now = new Date().toISOString();
+  const quantity = Number(document.getElementById('quantityInput').value) || 0;
+  const brokenQty = Number(document.getElementById('brokenQtyInput').value) || 0;
+  const lostQty = Number(document.getElementById('lostQtyInput').value) || 0;
+  const lowStockQty = Number(document.getElementById('lowStockQtyInput').value) || 0;
+
+  if (brokenQty + lostQty + lowStockQty > quantity) {
+    alert("Error: The sum of Broken, Lost, and Low Stock quantities (" + (brokenQty + lostQty + lowStockQty) + ") cannot exceed the Total Quantity (" + quantity + ").");
+    return;
+  }
+
+  const data = {
+    name: document.getElementById('nameInput').value.trim(),
+    category: document.getElementById('categorySelect').value,
+    subcategory: document.getElementById('subcategoryInput').value.trim(),
+    quantity: quantity,
+    brokenQty: brokenQty,
+    lostQty: lostQty,
+    lowStockQty: lowStockQty,
+    unit: document.getElementById('unitInput').value.trim() || 'Each',
+    location: document.getElementById('locationInput').value.trim(),
+    assetTag: document.getElementById('assetTagInput').value.trim(),
+    serialNumber: document.getElementById('serialInput').value.trim(),
+    minStock: Number(document.getElementById('minStockInput').value) || 0,
+    cost: Number(document.getElementById('costInput').value) || 0,
+    purchaseDate: document.getElementById('purchaseDateInput').value,
+    warrantyExpiry: document.getElementById('warrantyInput').value,
+    supplier: document.getElementById('supplierInput').value.trim(),
+    notes: document.getElementById('notesInput').value.trim(),
+    lastUpdated: now
+  };
+
+  if (!data.name){
+    alert('Please enter an item name.');
+    return;
+  }
+
+  if (id){
+    const idx = items.findIndex(i=>i.id===id);
+    // Keep the existing isLowStock flag when editing
+    data.isLowStock = items[idx].isLowStock;
+    items[idx] = Object.assign({}, items[idx], data);
+  } else {
+    items.push(Object.assign({id:uid(), dateAdded:now, isLowStock:false}, data));
+  }
+
+  await saveItems();
+  closeModal();
+  render();
+}
+
+function deleteItem(id){
+  const item = items.find(i=>i.id===id);
+  if (!item) return;
+  if (!confirm(`Delete "${item.name}" from inventory? This can't be undone.`)) return;
+  items = items.filter(i=>i.id!==id);
+  saveItems();
+  render();
+}
+
+/* =====================================================
+   EXPORT / IMPORT
+===================================================== */
+function csvEscape(val){
+  const s = String(val ?? '');
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+function downloadFile(content, filename, mime){
+  const blob = new Blob([content], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportCSV(){
+  const headers = ['Name','Category','Subcategory','Quantity','Unit','Status','Location','Asset Tag','Serial Number','Min Stock','Low Stock Flag','Unit Cost (GH&#8373;)','Total Value (GH&#8373;)','Supplier','Purchase Date','Warranty Expiry','Notes','Date Added','Last Updated'];
+  const rows = items.map(i=>[
+    i.name, CATEGORIES[i.category].label, i.subcategory, i.quantity, i.unit, i.status,
+    i.location, i.assetTag, i.serialNumber, i.minStock, i.isLowStock ? 'Yes' : 'No', i.cost,
+    (Number(i.quantity||0)*Number(i.cost||0)).toFixed(2),
+    i.supplier, i.purchaseDate, i.warrantyExpiry, i.notes, i.dateAdded, i.lastUpdated
+  ]);
+  const csv = [headers, ...rows].map(row=>row.map(csvEscape).join(',')).join('\n');
+  downloadFile(csv, 'equipment-inventory.csv', 'text/csv');
+}
+function exportJSON(){
+  downloadFile(JSON.stringify(items, null, 2), 'equipment-inventory-backup.json', 'application/json');
+}
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      if (!confirm(`Import ${data.length} item(s)? This will replace your current inventory.`)) return;
+      items = data.map(d=>Object.assign(mkItem({}), d));
+      await saveItems();
+      render();
+    } catch(err){
+      alert("Couldn't import this file. Make sure it's a backup exported from Equipment Ledger.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function viewDrilldown(type, categoryKey) {
+  const modal = document.getElementById('dashboardDrilldownModal');
+  const title = document.getElementById('drilldownTitle');
+  const body = document.getElementById('drilldownBody');
+  
+  // Also close other modals to avoid stacking issues (added earlier)
+  document.getElementById('itemDetailsModal').hidden = true;
+  document.getElementById('modalOverlay').hidden = true;
+
+  let filtered = [];
+  if (type === 'all') {
+    title.textContent = 'All Items';
+    filtered = items;
+  } else if (type === 'lowstock') {
+    title.textContent = 'Low Stock Items';
+    filtered = items.filter(i => (Number(i.quantity||0) - Number(i.brokenQty||0) - Number(i.lostQty||0) - Number(i.lowStockQty||0) - Number(i.borrowedQty||0) <= Number(i.minStock||0)) || i.isLowStock || Number(i.lowStockQty||0) > 0);
+  } else if (type === 'available') {
+    title.textContent = 'Available Items';
+    filtered = items.filter(i => (Number(i.quantity||0) - Number(i.brokenQty||0) - Number(i.lostQty||0) - Number(i.lowStockQty||0)) > 0);
+  } else if (type === 'broken') {
+    title.textContent = 'Broken Items';
+    filtered = items.filter(i => Number(i.brokenQty||0) > 0);
+  } else if (type === 'lost') {
+    title.textContent = 'Lost Items';
+    filtered = items.filter(i => Number(i.lostQty||0) > 0);
+  } else if (type === 'category') {
+    title.textContent = CATEGORIES[categoryKey].label;
+    filtered = items.filter(i => i.category === categoryKey);
+  }
+
+  if (filtered.length === 0) {
+    body.innerHTML = '<div style="color:var(--ink-soft); font-size:14px; text-align:center; padding:20px;">No items found.</div>';
+  } else {
+    body.innerHTML = filtered.map(i => `
+      <div class="clickable-row" data-action="view-item" data-id="${i.id}" style="padding:10px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:600; font-size:14px;">${escapeHtml(i.name)}</div>
+          <div style="font-size:12px; color:var(--ink-soft);">${escapeHtml(i.assetTag||'--')} &middot; ${i.quantity} total units</div>
+        </div>
+        <span style="font-size:18px; color:var(--ink-soft);">&rsaquo;</span>
+      </div>
+    `).join('');
+  }
+  modal.hidden = false;
+}
+
+function viewItem(id) {
+  const modal = document.getElementById('itemDetailsModal');
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  
+  // Close drilldown modal if open
+  document.getElementById('dashboardDrilldownModal').hidden = true;
+
+  document.getElementById('viewItemName').textContent = item.name;
+  
+  const avail = item.quantity - (item.brokenQty||0) - (item.lostQty||0) - (item.lowStockQty||0);
+  let statusBadges = '';
+  if (avail > 0) statusBadges += badge(avail + ' Avail', STATUS_COLORS) + ' ';
+  if ((item.brokenQty||0) > 0) statusBadges += badge(item.brokenQty + ' Broken', STATUS_COLORS) + ' ';
+  if ((item.lostQty||0) > 0) statusBadges += badge(item.lostQty + ' Lost', STATUS_COLORS) + ' ';
+  if ((item.lowStockQty||0) > 0) statusBadges += badge(item.lowStockQty + ' Low Stock', STATUS_COLORS) + ' ';
+  if (!statusBadges) statusBadges = badge('0 Avail', STATUS_COLORS);
+
+  const body = document.getElementById('itemDetailsBody');
+  body.innerHTML = `
+    <div><strong>Asset Tag:</strong> ${item.assetTag ? escapeHtml(item.assetTag) : '&mdash;'}</div>
+    <div><strong>Category:</strong> ${CATEGORIES[item.category].label} </div>
+    <div><strong>Total Quantity:</strong> ${item.quantity} ${escapeHtml(item.unit||'')}</div>
+    <div><strong>Current Status:</strong> ${statusBadges}</div>
+    <div><strong>Unit Cost:</strong> ${fmtMoney(item.cost)}</div>
+    <div><strong>Total Value:</strong> ${fmtMoney(item.cost * item.quantity)}</div>
+    <div><strong>Supplier:</strong> ${item.supplier ? escapeHtml(item.supplier) : '&mdash;'}</div>
+    <div><strong>Purchase Date:</strong> ${item.purchaseDate ? item.purchaseDate : '&mdash;'}</div>
+    <div><strong>Warranty Expiry:</strong> ${item.warrantyExpiry ? item.warrantyExpiry : '&mdash;'}</div>
+    <div><strong>Notes:</strong><br>${item.notes ? escapeHtml(item.notes) : '&mdash;'}</div>
+  `;
+  
+  document.getElementById('viewItemEditBtn').onclick = () => {
+    modal.hidden = true;
+    openModal(id);
+  };
+  document.getElementById('viewItemDeleteBtn').onclick = () => {
+    modal.hidden = true;
+    deleteItem(id);
+  };
+  
+  modal.hidden = false;
+}
+
+function setupGlobalListeners(){
+  document.body.addEventListener('submit', async e => {
+      if (e.target.id === 'loginForm') {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const pwd = document.getElementById('loginPassword').value;
+        const errDiv = document.getElementById('loginError');
+        if (errDiv) errDiv.style.display = 'none';
+        
+        try {
+          if (!databases) throw new Error("Appwrite is not connected");
+          
+          // Check if account is revoked
+          const revokeSnap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REVOKED, [Query.equal('email', email)]);
+          if (revokeSnap.documents.length > 0) {
+            alert("Access Denied: This school account has been removed by the Science Coordinator.");
+            return;
+          }
+
+          const schoolSnap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('email', email)]);
+          if (schoolSnap.documents.length === 0) {
+            throw new Error("Invalid school email address or account not found.");
+          }
+
+          const schoolDoc = schoolSnap.documents[0];
+          const expectedPassword = schoolDoc.currentPassword || 'password123';
+          if (pwd !== expectedPassword) {
+            throw new Error("Incorrect master password for " + (schoolDoc.schoolName || email));
+          }
+
+          if (schoolDoc.type === 'community') {
+            alert("Access Denied: This app is for STEM schools only. Please use the Community App.");
+            return;
+          }
+
+          const max = schoolDoc.maxLogins !== undefined ? schoolDoc.maxLogins : 3;
+          const active = schoolDoc.activeLogins !== undefined ? schoolDoc.activeLogins : 0;
+          if (active >= max) {
+            alert(`Login limit reached (${active}/${max}). Contact the Science Coordinator to refresh your logins.`);
+            return;
+          }
+
+          await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, schoolDoc.$id, {
+            activeLogins: active + 1
+          });
+
+          if (account) {
+            try {
+              await account.createEmailPasswordSession(email, pwd);
+            } catch(authErr) {
+              // Session fallback
+            }
+          }
+
+          appSettings.isAuthenticated = true;
+          appSettings.email = email;
+          appSettings.schoolName = schoolDoc.schoolName;
+          appSettings.schoolDocId = schoolDoc.$id;
+          localStorage.setItem('stem_settings', JSON.stringify(appSettings));
+
+          let cloudItems = [];
+          try {
+            cloudItems = typeof schoolDoc.items === 'string' ? JSON.parse(schoolDoc.items) : (schoolDoc.items || []);
+          } catch(e) { cloudItems = []; }
+          if (cloudItems && cloudItems.length > 0) {
+            items = cloudItems;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+          }
+
+          currentView = 'dashboard';
+          startInventoryListener();
+          startChatListener();
+          startApprovalsListener();
+          render();
+        } catch (error) {
+          if (errDiv) {
+            errDiv.style.display = 'block';
+            errDiv.textContent = error.message;
+          } else {
+            alert("Login failed: " + error.message);
+          }
+        }
+      } else if (e.target.id === 'chatForm' || e.target.id === 'convoForm') {
+        // Handled directly by handleChatSubmit inline function
+      } else {
+        e.preventDefault();
+        saveItemFromForm();
+      }
+    });
+
+  document.body.addEventListener('click', async e=>{
+      const el = e.target.closest('[data-action]');
+      if(!el) return;
+      const action = el.dataset.action;
+      const id = el.dataset.id;
+      
+      if(action === 'delete'){
+        if(confirm('Delete this item?')){
+          deleteItem(id);
+        }
+      } else if(action === 'edit'){
+        showModal(id);
+      }
+      
+    switch(action){
+      case 'set-view':
+        // Close conversation overlay if open
+        const convoOv = document.getElementById('convoOverlay');
+        if (convoOv && convoOv.classList.contains('open')) {
+          convoOv.classList.remove('open');
+          document.body.classList.remove('convo-open');
+          currentChatRecipient = null;
+        }
+        currentView = el.dataset.view;
+        document.getElementById('sidebar').classList.remove('open');
+        render();
+        break;
+      case 'filter-category':
+        filters.category = el.dataset.cat;
+        currentView = 'inventory';
+        document.getElementById('sidebar').classList.remove('open');
+        render();
+        break;
+
+      
+        case 'save-settings':
+          const token = document.getElementById('githubTokenInput').value.trim();
+          const gist = document.getElementById('gistIdInput').value.trim();
+          appSettings.githubToken = token;
+          appSettings.gistId = gist;
+          localStorage.setItem('stem_settings', JSON.stringify(appSettings));
+          alert("Settings saved!");
+          break;
+        case 'sync-to-cloud':
+          syncToCloud();
+          break;
+        case 'sync-from-cloud':
+          syncFromCloud();
+          break;
+        case 'goto-login':
+          currentView = 'login';
+          render();
+          break;
+        case 'logout':
+          try {
+            if (databases && appSettings.schoolName) {
+              try {
+                const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.equal('schoolName', appSettings.schoolName)]);
+                if (snap.documents.length > 0) {
+                  const doc = snap.documents[0];
+                  const currentActive = doc.activeLogins || 0;
+                  const nextActive = Math.max(0, currentActive - 1);
+                  await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, doc.$id, {
+                    activeLogins: nextActive
+                  });
+                }
+              } catch(err) {
+                console.error("Error decrementing activeLogins: ", err);
+              }
+            }
+            if (account) {
+              account.deleteSession('current').catch(console.error);
+            }
+            appSettings = { schoolName: '', email: '', photoUrl: '', isAuthenticated: false };
+            localStorage.removeItem('stem_settings');
+            localStorage.removeItem('stem_items');
+            items = seedData();
+            if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+            if (approvalsUnsubscribe) { approvalsUnsubscribe(); approvalsUnsubscribe = null; }
+            approvalsInitialLoad = true;
+            currentView = 'login';
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.remove('open');
+            render();
+          } catch(e) {
+            console.error("Logout error: ", e);
+            alert("Error logging out: " + e.message);
+          }
+          break;
+
+
+        case 'add-item':
+        openModal(null);
+        break;
+              case 'dashboard-drilldown':
+          viewDrilldown(el.dataset.type, el.dataset.category);
+          break;
+        case 'view-item':
+        viewItem(el.dataset.id);
+        break;
+      case 'edit-item':
+        openModal(el.dataset.id);
+        break;
+      case 'delete-item':
+        deleteItem(el.dataset.id);
+        break;
+      case 'close-modal':
+        closeModal();
+        break;
+      case 'sort':{
+        const col = el.dataset.col;
+        if (sortState.col===col) sortState.dir = sortState.dir==='asc' ? 'desc' : 'asc';
+        else { sortState.col=col; sortState.dir='asc'; }
+        renderView();
+        break;
+      }
+      case 'export-csv':
+        exportCSV();
+        break;
+      case 'export-json':
+        exportJSON();
+        break;
+      case 'toggle-sidebar':
+        document.getElementById('sidebar').classList.toggle('open');
+        break;
+    }
+  });
+
+      document.getElementById('modalOverlay').addEventListener('click', e=>{
+      if (e.target.id === 'modalOverlay') closeModal();
+    });
+    document.getElementById('dashboardDrilldownModal').addEventListener('click', e=>{
+      if (e.target.id === 'dashboardDrilldownModal') e.target.hidden = true;
+    });
+    document.getElementById('itemDetailsModal').addEventListener('click', e=>{
+      if (e.target.id === 'itemDetailsModal') e.target.hidden = true;
+    });
+    document.addEventListener('keydown', e=>{
+      if (e.key === 'Escape') {
+        if (!document.getElementById('itemDetailsModal').hidden) {
+          document.getElementById('itemDetailsModal').hidden = true;
+        } else if (!document.getElementById('dashboardDrilldownModal').hidden) {
+          document.getElementById('dashboardDrilldownModal').hidden = true;
+        } else if (!document.getElementById('modalOverlay').hidden) {
+          closeModal();
+        }
+      }
+    });
+
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    filters.search = e.target.value;
+    currentView = 'inventory';
+    render();
+  });
+
+  document.getElementById('importFile').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if (file) importJSON(file);
+    e.target.value = '';
+  });
+
+  // Handle Select Filters and Checkbox Toggles
+  document.getElementById('view').addEventListener('change', e=>{
+    if (e.target.dataset.action === 'toggle-lowstock') {
+      const itemId = e.target.dataset.id;
+      const itemToToggle = items.find(i => i.id === itemId);
+      if(itemToToggle) {
+        itemToToggle.isLowStock = e.target.checked;
+        saveItems();
+        // Silently update the data so the user doesn't lose focus by re-rendering the whole view. 
+        // It will perfectly reflect on the dashboard when they switch tabs.
+      }
+      return; 
+    }
+    
+    if (e.target.id === 'categoryFilter'){ filters.category = e.target.value; renderView(); }
+    if (e.target.id === 'statusFilter'){ filters.status = e.target.value; renderView(); }
+  });
+}
+
+  /* =====================================================
+     CHAT LOGIC – WhatsApp-style two-view architecture
+  ===================================================== */
+  let chatMessages = [];
+  let registeredSchools = [];
+  let currentChatRecipient = null;
+  let unreadCounts = {};
+  let chatUnsubscribe = null;
+  let approvalsUnsubscribe = null;
+  let incomingRequests = [];
+  let outgoingRequests = [];
+  let approvalsInitialLoad = true;
+
+  function showToast(message, bodyText) {
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    if (!toast || !msgEl) return;
+    msgEl.innerText = bodyText || message;
+    toast.classList.add('show');
+    
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch(e) { console.error("Audio failed", e); }
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+  window.showToast = showToast;
+
+  let recentChats = JSON.parse(localStorage.getItem('stem_recent_chats') || '[]');
+  // recentChats = [{email, name}]
+  let lastReadTimestamps = JSON.parse(localStorage.getItem('stem_last_read_timestamps') || '{}');
+
+  function saveRecentChats() {
+    localStorage.setItem('stem_recent_chats', JSON.stringify(recentChats));
+  }
+
+  function saveLastReadTimestamps() {
+    localStorage.setItem('stem_last_read_timestamps', JSON.stringify(lastReadTimestamps));
+  }
+
+  function addToRecentChats(email, name) {
+    recentChats = recentChats.filter(r => r.email !== email);
+    recentChats.unshift({ email, name });
+    if (recentChats.length > 30) recentChats.length = 30;
+    saveRecentChats();
+  }
+
+  function getUnreadTotal() {
+    return Object.values(unreadCounts).reduce((a, b) => a + b, 0);
+  }
+
+  function getInitials(name) {
+    if (!name) return '?';
+    if (name === 'Science Coordinator') return 'SC';
+    const parts = name.trim().split(' ');
+    return parts.map(p => p[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function getAvatarColor(email) {
+    const colors = ['#1C2D5E','#2D6A4F','#C9622A','#6B4FA0','#1D6E8A','#8B5E3C','#A0436B','#2E7D32'];
+    let hash = 0;
+    for (let i = 0; i < (email||'').length; i++) hash = ((hash << 5) - hash) + email.charCodeAt(i);
+    return colors[Math.abs(hash) % colors.length];
+  }
+
+  async function fetchRegisteredSchools() {
+    if (!databases) return;
+    try {
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.SCHOOLS, [Query.limit(100)]);
+      const arr = [];
+      snap.documents.forEach(doc => {
+        if (doc.email !== appSettings.email) {
+          arr.push({ name: doc.schoolName || doc.$id, email: doc.email, photoUrl: doc.photoUrl });
+        }
+      });
+      arr.sort((a,b) => a.name.localeCompare(b.name));
+      registeredSchools = arr;
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  function getNameForEmail(email) {
+    if (email === 'master') return 'Science Coordinator';
+    const school = registeredSchools.find(s => s.email === email);
+    if (school) return school.name;
+    const recent = recentChats.find(r => r.email === email);
+    if (recent) return recent.name;
+    return email;
+  }
+
+  function getPhotoUrlForEmail(email) {
+    if (email === 'master') return null;
+    const school = registeredSchools.find(s => s.email === email);
+    return school ? school.photoUrl : null;
+  }
+
+  function getLastMessageForRecipient(email) {
+    const filtered = chatMessages.filter(m => {
+      if (email === 'master') {
+        return (m.senderEmail === appSettings.email && (m.recipientEmail === 'master' || m.type === 'master')) ||
+               (m.senderEmail === 'master' && m.recipientEmail === appSettings.email);
+      } else {
+        return (m.senderEmail === appSettings.email && m.recipientEmail === email) ||
+               (m.senderEmail === email && m.recipientEmail === appSettings.email);
+      }
+    });
+    return filtered.length > 0 ? filtered[filtered.length - 1] : null;
+  }
+
+  /* ---------- chatListViewHTML ---------- */
+  function chatListViewHTML() {
+    // Build recent chats list sorted by last message time
+    let chatItems = recentChats.map(r => {
+      const lastMsg = getLastMessageForRecipient(r.email);
+      let snippet = 'No messages yet';
+      let timeStr = '';
+      let ts = 0;
+      if (lastMsg) {
+        snippet = lastMsg.text || '';
+        if (snippet.length > 40) snippet = snippet.substring(0, 40) + '…';
+        let d = lastMsg.timestamp;
+        if (d && typeof d.toDate === 'function') d = d.toDate();
+        if (d) {
+          ts = new Date(d).getTime();
+          timeStr = new Date(d).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+      }
+      const badge = unreadCounts[r.email] || 0;
+      return { email: r.email, name: r.name, snippet, timeStr, ts, badge };
+    });
+    // Sort newest first
+    chatItems.sort((a,b) => (b.ts || 0) - (a.ts || 0));
+
+    let rowsHTML = '';
+    if (chatItems.length === 0) {
+      rowsHTML = `
+        <div class="chat-list-empty">
+          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+          <p><strong>No conversations yet</strong></p>
+          <p style="margin-top:6px;">Tap <strong>+ New</strong> above to start chatting with another school.</p>
+        </div>`;
+    } else {
+      rowsHTML = chatItems.map(c => {
+        const photo = getPhotoUrlForEmail(c.email);
+        const avatarHTML = photo ?
+          `<img class="chat-avatar" src="${photo}" style="object-fit: cover; width: 40px; height: 40px; border-radius: 50%;">` :
+          `<div class="chat-avatar" style="background:${getAvatarColor(c.email)}">${getInitials(c.name)}</div>`;
+        return `
+          <div class="recent-chat-row" onclick="openConversation('${escapeHtml(c.email)}')" ontouchstart="chatRowTouchStart(event, '${escapeHtml(c.email)}')" ontouchend="chatRowTouchEnd(event, '${escapeHtml(c.email)}')" onmousedown="chatRowMouseDown(event, '${escapeHtml(c.email)}')" onmouseup="chatRowMouseUp(event, '${escapeHtml(c.email)}')" onmouseleave="chatRowMouseLeave(event)">
+            ${avatarHTML}
+            <div class="recent-chat-info">
+              <div class="recent-chat-name">${escapeHtml(c.name)}</div>
+              <div class="recent-chat-snippet">${escapeHtml(c.snippet)}</div>
+            </div>
+            <div class="recent-chat-meta">
+              ${c.timeStr ? `<div class="recent-chat-time">${c.timeStr}</div>` : ''}
+              ${c.badge > 0 ? `<div class="recent-chat-badge">${c.badge}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Messages</h1>
+          <p class="page-subtitle">Chat Hub</p>
+        </div>
+        <button class="btn btn-primary" onclick="openNewMessageSheet()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          New
+        </button>
+      </div>
+
+      <div class="chat-list-view">
+        <div class="chat-list-body">
+          ${rowsHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  /* ---------- Open / Close New Message Sheet ---------- */
+  window.openNewMessageSheet = function() {
+    const overlay = document.getElementById('nmOverlay');
+    if (!overlay) return;
+    overlay.classList.add('show');
+
+    const list = document.getElementById('nmSchoolList');
+    if (registeredSchools.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink-soft);font-size:13px;">No other schools found.</div>';
+      return;
+    }
+
+    // Always show Science Coordinator first
+    let html = `
+      <div class="nm-school-row" onclick="selectNewRecipient('master','Science Coordinator')">
+        <div class="chat-avatar" style="background:var(--accent);width:36px;height:36px;font-size:13px;">SC</div>
+        <div>
+          <div class="nm-school-name">Science Coordinator</div>
+          <div class="nm-school-email">Broadcast channel</div>
+        </div>
+      </div>`;
+
+    registeredSchools.forEach(s => {
+      html += `
+        <div class="nm-school-row" onclick="selectNewRecipient('${escapeHtml(s.email)}','${escapeHtml(s.name)}')">
+          <div class="chat-avatar" style="background:${getAvatarColor(s.email)};width:36px;height:36px;font-size:13px;">${getInitials(s.name)}</div>
+          <div>
+            <div class="nm-school-name">${escapeHtml(s.name)}</div>
+            <div class="nm-school-email">${escapeHtml(s.email)}</div>
+          </div>
+        </div>`;
+    });
+    list.innerHTML = html;
+  };
+
+  window.closeNewMessageSheet = function() {
+    const overlay = document.getElementById('nmOverlay');
+    if (overlay) overlay.classList.remove('show');
+  };
+
+  window.selectNewRecipient = function(email, name) {
+    closeNewMessageSheet();
+    addToRecentChats(email, name);
+    setTimeout(() => openConversation(email), 200);
+  };
+
+  /* ---------- Chat Long Press Deletion & Open ---------- */
+  let touchTimer = null;
+  window.isLongPressing = false;
+
+  window.chatRowTouchStart = function(event, email) {
+    if (touchTimer) clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => {
+      touchTimer = null;
+      window.isLongPressing = true;
+      window.confirmDeleteConversation(email);
+    }, 600);
+  };
+
+  window.chatRowTouchEnd = function(event, email) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.chatRowMouseDown = function(event, email) {
+    if (touchTimer) clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => {
+      touchTimer = null;
+      window.isLongPressing = true;
+      window.confirmDeleteConversation(email);
+    }, 600);
+  };
+
+  window.chatRowMouseUp = function(event, email) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.chatRowMouseLeave = function(event) {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  };
+
+  window.confirmDeleteConversation = function(email) {
+    const schoolName = getNameForEmail(email) || email;
+    if (confirm(`Delete Conversation?\n\nWarning: This action will permanently delete all messages in this conversation for both schools. This cannot be undone.`)) {
+      db.collection('chat_messages')
+        .where('senderEmail', 'in', [appSettings.email, email])
+        .where('recipientEmail', 'in', [appSettings.email, email])
+        .get()
+        .then(snapshot => {
+          const batch = db.batch();
+          let count = 0;
+          snapshot.forEach(doc => {
+            const d = doc.data();
+            // Ensure exact matching of sender/recipient pair (necessary due to 'in' query limitations)
+            if ((d.senderEmail === appSettings.email && d.recipientEmail === email) ||
+                (d.senderEmail === email && d.recipientEmail === appSettings.email)) {
+              batch.delete(doc.ref);
+              count++;
+            }
+          });
+          if (count > 0) {
+            return batch.commit();
+          }
+        })
+        .then(() => {
+          if (typeof showToast === 'function') {
+            if (showToast.length === 1) {
+              showToast("Conversation deleted");
+            } else {
+              showToast("System", "Conversation deleted");
+            }
+          } else {
+            alert("Conversation deleted");
+          }
+          if (typeof renderView === 'function') renderView();
+        })
+        .catch(err => {
+          console.error("Error deleting conversation: ", err);
+          alert("Error deleting conversation: " + err.message);
+        });
+    } else {
+      // If cancelled, reset long pressing flag immediately
+      window.isLongPressing = false;
+    }
+  };
+
+  /* ---------- Open / Close Conversation ---------- */
+  window.openConversation = function(email) {
+    if (window.isLongPressing) {
+      window.isLongPressing = false;
+      return;
+    }
+    currentChatRecipient = email;
+    const name = getNameForEmail(email);
+    addToRecentChats(email, name);
+
+    // Clear unread for this recipient by updating its last read timestamp
+    const recipientMessages = chatMessages.filter(m => {
+      if (email === 'master') {
+        return (m.senderEmail === appSettings.email && (m.recipientEmail === 'master' || m.type === 'master')) ||
+               (m.senderEmail === 'master' && m.recipientEmail === appSettings.email);
+      } else {
+        return (m.senderEmail === appSettings.email && m.recipientEmail === email) ||
+               (m.senderEmail === email && m.recipientEmail === appSettings.email);
+      }
+    });
+    if (recipientMessages.length > 0) {
+      const lastMsg = recipientMessages[recipientMessages.length - 1];
+      let ts = lastMsg.timestamp;
+      if (ts && typeof ts.toDate === 'function') ts = ts.toDate();
+      if (ts) {
+        lastReadTimestamps[email] = new Date(ts).getTime();
+        saveLastReadTimestamps();
+      }
+    }
+    unreadCounts[email] = 0;
+    updateChatBadge();
+
+    // Update header
+    const avatar = document.getElementById('convoAvatar');
+    const nameEl = document.getElementById('convoName');
+    if (avatar) {
+      const photo = getPhotoUrlForEmail(email);
+      if (photo) {
+        avatar.innerHTML = `<img src="${photo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        avatar.style.background = 'none';
+      } else {
+        avatar.innerHTML = '';
+        avatar.style.background = getAvatarColor(email);
+        avatar.textContent = getInitials(name);
+      }
+    }
+    if (nameEl) nameEl.textContent = name;
+
+    // Render messages
+    renderConvoMessages();
+
+    // Slide in the overlay
+    const overlay = document.getElementById('convoOverlay');
+    if (overlay) {
+      document.body.classList.add('convo-open');
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    }
+  };
+
+  window.closeConversation = function() {
+    const overlay = document.getElementById('convoOverlay');
+    if (overlay) overlay.classList.remove('open');
+    document.body.classList.remove('convo-open');
+    currentChatRecipient = null;
+    // Re-render chat list to update snippets
+    if (currentView === 'chat') {
+      const root = document.getElementById('view');
+      if (root) root.innerHTML = chatListViewHTML();
+    }
+  };
+
+  /* ---------- Render messages in convo overlay ---------- */
+  function renderConvoMessages() {
+    const area = document.getElementById('convoMessages');
+    if (!area || !currentChatRecipient) return;
+
+    const filtered = chatMessages.filter(m => {
+      if (currentChatRecipient === 'master') {
+        return (m.senderEmail === appSettings.email && (m.recipientEmail === 'master' || m.type === 'master')) ||
+               (m.senderEmail === 'master' && m.recipientEmail === appSettings.email);
+      } else {
+        return (m.senderEmail === appSettings.email && m.recipientEmail === currentChatRecipient) ||
+               (m.senderEmail === currentChatRecipient && m.recipientEmail === appSettings.email);
+      }
+    });
+
+    if (filtered.length === 0) {
+      area.innerHTML = `<div style="text-align:center; color:var(--ink-soft); font-size:12px; margin-top:30px;">
+        No messages yet. Say hello! 👋
+      </div>`;
+      return;
+    }
+
+    area.innerHTML = filtered.map(m => {
+      const isMine = m.senderEmail === appSettings.email;
+      let ts = m.timestamp;
+      if (ts && typeof ts.toDate === 'function') ts = ts.toDate();
+      const time = ts ? (new Date(ts).toLocaleDateString([], {month:'short', day:'numeric'}) + ', ' + new Date(ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})) : 'Now';
+      const senderName = isMine ? 'You' : (m.senderEmail === 'master' ? 'Coordinator' : escapeHtml(m.senderSchool || 'User'));
+      return `
+        <div class="chat-bubble ${isMine ? 'mine' : 'theirs'}">
+          <div class="chat-sender">${senderName}</div>
+          <div>${escapeHtml(m.text)}</div>
+          <div class="chat-time">${time}</div>
+        </div>`;
+    }).join('');
+
+    setTimeout(() => { area.scrollTop = area.scrollHeight; }, 50);
+  }
+
+  function updateChatBadge() {
+    const badges = document.querySelectorAll('.chat-badge-counter');
+    const total = getUnreadTotal();
+    badges.forEach(badge => {
+      badge.innerText = total;
+      badge.style.display = total > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  async function fetchChatMessages() {
+    if (!databases || !appSettings.email) return;
+    try {
+      fetchRegisteredSchools();
+      const res = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, [Query.limit(100), Query.orderAsc('createdAt')]);
+      const newMessages = res.documents.map(d => ({
+        id: d.$id,
+        senderEmail: d.sender,
+        recipientEmail: d.recipient,
+        senderSchool: d.senderSchool || (d.sender === 'master' ? 'Science Coordinator' : d.sender),
+        text: d.text,
+        timestamp: d.createdAt || d.$createdAt,
+        type: d.type || (d.recipient === 'broadcast' ? 'broadcast' : (d.recipient === 'master' ? 'master' : 'direct')),
+        ...d
+      }));
+
+      const newUnreadCounts = {};
+      newMessages.forEach(m => {
+        if (m.senderEmail === appSettings.email) return;
+
+        let senderKey = null;
+        if (m.senderEmail === 'master') {
+          if (m.recipientEmail === appSettings.email || m.recipientEmail === 'broadcast') {
+            senderKey = 'master';
+          } else {
+            return;
+          }
+        } else {
+          if (m.recipientEmail === appSettings.email) {
+            senderKey = m.senderEmail;
+          } else {
+            return;
+          }
+        }
+
+        const senderName = senderKey === 'master' ? 'Science Coordinator' : (m.senderSchool || m.senderEmail);
+        if (!recentChats.some(r => r.email === senderKey)) {
+          addToRecentChats(senderKey, senderName);
+        }
+
+        const msgTs = new Date(m.timestamp).getTime() || 0;
+        const lastReadTs = lastReadTimestamps[senderKey] || 0;
+
+        const isViewingThis = currentView === 'chat' && currentChatRecipient === senderKey &&
+                              document.getElementById('convoOverlay')?.classList.contains('open');
+
+        if (isViewingThis) {
+          lastReadTimestamps[senderKey] = Math.max(lastReadTs, msgTs);
+          saveLastReadTimestamps();
+        } else if (msgTs > lastReadTs) {
+          newUnreadCounts[senderKey] = (newUnreadCounts[senderKey] || 0) + 1;
+        }
+      });
+
+      unreadCounts = newUnreadCounts;
+      updateChatBadge();
+      chatMessages = newMessages;
+
+      if (currentChatRecipient && document.getElementById('convoOverlay')?.classList.contains('open')) {
+        renderConvoMessages();
+      }
+
+      if (currentView === 'chat' && !document.getElementById('convoOverlay')?.classList.contains('open')) {
+        const root = document.getElementById('view');
+        if (root) root.innerHTML = chatListViewHTML();
+      }
+    } catch(err) {
+      console.error("Chat fetch error:", err);
+    }
+  }
+
+  function startChatListener() {
+    fetchChatMessages();
+    if (client) {
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      chatUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.MESSAGES}.documents`, () => {
+        fetchChatMessages();
+      });
+    }
+  }
+
+  /* ---------- Send message ---------- */
+  window.handleChatSubmit = async function(e) {
+    e.preventDefault();
+    if (!appSettings.isAuthenticated || !databases || !currentChatRecipient) return;
+    const input = document.getElementById('convoInput');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+
+    try {
+      const convoId = [appSettings.email, currentChatRecipient].sort().join('_');
+      await databases.createDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.MESSAGES, ID.unique(), {
+        convoId: convoId,
+        sender: appSettings.email,
+        recipient: currentChatRecipient,
+        text: text,
+        createdAt: new Date().toISOString(),
+        read: false
+      });
+
+      lastReadTimestamps[currentChatRecipient] = Date.now();
+      saveLastReadTimestamps();
+      fetchChatMessages();
+    } catch(err) {
+      console.error("Failed to send message:", err);
+      alert("Failed to send message: " + err.message);
+    }
+  };
+
+  /* =====================================================
+     APPROVALS LOGIC
+  ===================================================== */
+  
+  function updateApprovalsBadge() {
+    const actionCount = incomingRequests.filter(r => r.status === 'pending' || r.status === 'returning').length;
+    const badges = document.querySelectorAll('.approvals-badge-counter');
+    badges.forEach(badge => {
+      badge.innerText = actionCount;
+      badge.style.display = actionCount > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  async function fetchApprovals() {
+    if (!databases || !appSettings.email) return;
+    try {
+      const res = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, [Query.limit(100)]);
+      const incoming = [];
+      const outgoing = [];
+
+      res.documents.forEach(doc => {
+        if (doc.archived) return;
+        let items = [];
+        try { items = typeof doc.items === 'string' ? JSON.parse(doc.items) : (doc.items || []); } catch(e) { items = []; }
+        const req = { ...doc, id: doc.$id, items: items };
+
+        if (req.targetSchoolEmail === appSettings.email || req.targetSchool === appSettings.schoolName) {
+          incoming.push(req);
+        } else if (req.requesterEmail === appSettings.email || req.requesterSchool === appSettings.schoolName) {
+          outgoing.push(req);
+        }
+      });
+
+      if (!approvalsInitialLoad) {
+        incoming.forEach(newReq => {
+          if (newReq.status === 'pending') {
+            const oldReq = incomingRequests.find(o => o.id === newReq.id);
+            if (!oldReq || oldReq.status !== 'pending') {
+              showToast(`New borrow request from ${newReq.requesterSchool || newReq.requestingSchool}!`);
+            }
+          } else if (newReq.status === 'returning') {
+            const oldReq = incomingRequests.find(o => o.id === newReq.id);
+            if (!oldReq || oldReq.status !== 'returning') {
+              showToast(`Return request initiated by ${newReq.requesterSchool || newReq.requestingSchool}!`);
+            }
+          }
+        });
+      }
+      approvalsInitialLoad = false;
+
+      incomingRequests = incoming.sort((a, b) => new Date(b.requestedAt || b.$createdAt || 0) - new Date(a.requestedAt || a.$createdAt || 0));
+      outgoingRequests = outgoing.sort((a, b) => new Date(b.requestedAt || b.$createdAt || 0) - new Date(a.requestedAt || a.$createdAt || 0));
+
+      updateApprovalsBadge();
+
+      if (currentView === 'approvals') {
+        const root = document.getElementById('view');
+        if (root) root.innerHTML = approvalsHTML();
+      }
+    } catch(err) {
+      console.error("Approvals fetch error:", err);
+    }
+  }
+
+  function startApprovalsListener() {
+    fetchApprovals();
+    if (client) {
+      if (approvalsUnsubscribe) { approvalsUnsubscribe(); approvalsUnsubscribe = null; }
+      approvalsUnsubscribe = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.REQUESTS}.documents`, () => {
+        fetchApprovals();
+      });
+  }
+
+  function timeAgo(date) {
+    if (!date) return 'some time ago';
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 0) return 'just now';
+    
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval + " year" + (interval === 1 ? "" : "s") + " ago";
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval + " month" + (interval === 1 ? "" : "s") + " ago";
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + " day" + (interval === 1 ? "" : "s") + " ago";
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + " hour" + (interval === 1 ? "" : "s") + " ago";
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + " minute" + (interval === 1 ? "" : "s") + " ago";
+    return "just now";
+  }
+
+  function approvalsHTML() {
+    return `
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Approvals</h1>
+          <p class="page-subtitle">Manage equipment borrow requests</p>
+        </div>
+      </div>
+      <div class="approvals-container" style="display:flex; flex-direction:column; gap:24px; margin-top:20px;">
+        <div class="approvals-section">
+          <h2 style="font-size:16px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:var(--ink);">
+            Incoming Borrow Requests 
+            <span class="badge" style="background:var(--accent-soft); color:var(--accent); font-size:12px; padding:2px 8px; border-radius:10px;">${incomingRequests.length}</span>
+          </h2>
+          ${incomingRequests.length === 0 ? `
+            <div style="background:var(--surface); padding:24px; text-align:center; border-radius:var(--radius); border:1px solid var(--border); color:var(--ink-soft);">
+              No incoming requests at the moment.
+            </div>
+          ` : `
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              ${incomingRequests.map(req => renderRequestCard(req, true)).join('')}
+            </div>
+          `}
+        </div>
+
+        <div class="approvals-section">
+          <h2 style="font-size:16px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:var(--ink);">
+            Outgoing Requests
+            <span class="badge" style="background:var(--surface-2); color:var(--ink-soft); font-size:12px; padding:2px 8px; border-radius:10px;">${outgoingRequests.length}</span>
+          </h2>
+          ${outgoingRequests.length === 0 ? `
+            <div style="background:var(--surface); padding:24px; text-align:center; border-radius:var(--radius); border:1px solid var(--border); color:var(--ink-soft);">
+              You haven't sent any borrow requests.
+            </div>
+          ` : `
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              ${outgoingRequests.map(req => renderRequestCard(req, false)).join('')}
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRequestCard(req, isIncoming) {
+    const statusColors = {
+      pending: { bg: '#FEF3C7', fg: '#D97706' },
+      approved: { bg: '#E1EFE6', fg: '#1F5C40' },
+      disapproved: { bg: '#F8E1DF', fg: '#A8332A' },
+      returning: { bg: '#FEF3C7', fg: '#D97706' },
+      returned: { bg: '#E1EFE6', fg: '#1F5C40' }
+    };
+    const statusColor = statusColors[req.status] || { bg: '#ECECEC', fg: '#666' };
+    
+    let statusLabel = req.status === 'returning' ? 'Returning' : req.status.charAt(0).toUpperCase() + req.status.slice(1);
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isOverdue = (req.endDate && req.endDate < todayStr && req.status === 'approved');
+    if (isOverdue) {
+      statusLabel = '<span style="color:var(--danger); font-weight:800; margin-right:4px;">OVERDUE</span> ' + statusLabel;
+    }
+    
+    const formattedDates = `${new Date(req.startDate).toLocaleDateString()} - ${new Date(req.endDate).toLocaleDateString()}`;
+    const locationLabel = req.usageLocation === 'requester_school' 
+      ? `${escapeHtml(req.requesterSchool || "Borrowing school")} premises` 
+      : `${escapeHtml(req.targetSchool || "Lending school")} premises`;
+    
+    const dateObj = (req.requestedAt && typeof req.requestedAt.toDate === 'function') ? req.requestedAt.toDate() : new Date(req.requestedAt || Date.now());
+    const age = timeAgo(dateObj);
+    
+    const itemCount = req.items ? req.items.reduce((sum, item) => sum + Number(item.quantity), 0) : 0;
+    const headerName = isIncoming ? (req.requesterSchool || 'Community School') : (req.targetSchool || 'STEM School');
+    const subtitle = isIncoming ? `from ${escapeHtml(req.requesterTown || 'Unknown')}` : `owned by ${escapeHtml(req.targetSchool || '')}`;
+    const teacherInfo = (isIncoming && req.requestingTeacherName) ? `Teacher: ${escapeHtml(req.requestingTeacherName)}` : '';
+    
+    const clickAttr = (isIncoming && (req.status === 'pending' || req.status === 'returning')) 
+      ? `onclick="openRequestReviewModal('${req.id}')" style="cursor:pointer;"` 
+      : '';
+
+    let detailReason = '';
+    if (req.status === 'disapproved' && req.disapprovalReason) {
+      detailReason = `
+        <div style="margin-top:8px; padding:8px 12px; background:var(--danger-soft); color:var(--danger); border-radius:var(--radius-sm); font-size:12px;">
+          <strong>Reason:</strong> ${escapeHtml(req.disapprovalReason)}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="card" ${clickAttr} style="background:var(--surface); border:1px solid ${isOverdue ? 'var(--danger)' : 'var(--border)'}; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <h3 style="margin:0; font-size:14px; font-weight:600; color:var(--ink);">${escapeHtml(headerName)}</h3>
+            <p style="margin:0; font-size:12px; color:var(--ink-soft);">${escapeHtml(subtitle)}</p>
+            ${teacherInfo ? `<p style="margin:2px 0 0 0; font-size:11px; color:var(--ink-soft); font-weight:600;">${teacherInfo}</p>` : ''}
+          </div>
+          <span class="badge" style="background:${statusColor.bg}; color:${statusColor.fg}; font-weight:600; font-size:12px; padding:4px 8px; border-radius:20px;">
+            ${statusLabel}
+          </span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:16px; margin-top:4px; font-size:12px; color:var(--ink-soft);">
+          <div style="display:flex; align-items:center; gap:4px;">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+            <span>${itemCount} item${itemCount === 1 ? '' : 's'}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+            <span>${formattedDates}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span>${locationLabel}</span>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:11px; color:var(--ink-soft);">
+          <span>Submitted ${age}</span>
+          ${isIncoming && req.status === 'pending' ? `<span style="color:var(--accent); font-weight:600; display:flex; align-items:center; gap:2px;">Review Request &rarr;</span>` : ''}
+          ${isIncoming && req.status === 'returning' ? `<span style="color:var(--accent); font-weight:600; display:flex; align-items:center; gap:2px;">Confirm Return &rarr;</span>` : ''}
+        </div>
+        ${detailReason}
+      </div>
+    `;
+  }
+
+  window.openRequestReviewModal = function(reqId) {
+    const req = incomingRequests.find(r => r.id === reqId);
+    if (!req) return;
+
+    const formattedDates = `${new Date(req.startDate).toLocaleDateString()} - ${new Date(req.endDate).toLocaleDateString()}`;
+    const locationLabel = req.usageLocation === 'requester_school' 
+      ? `Use at ${escapeHtml(req.requesterSchool)} premises` 
+      : `Use at ${escapeHtml(req.targetSchool)} premises`;
+
+    const teacherContact = req.requestingTeacherName 
+      ? `<div style="background:var(--surface-2); padding:12px; border-radius:var(--radius-sm); margin-bottom:16px; font-size:13px;">
+          <div style="font-weight:600; margin-bottom:4px;">Requesting Teacher</div>
+          <div>${escapeHtml(req.requestingTeacherName)} &middot; ${escapeHtml(req.requestingTeacherPhone || 'No phone')}</div>
+        </div>`
+      : '';
+
+    let itemsHTML = req.items.map(item => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600; color:var(--ink);">${escapeHtml(item.itemName)}</div>
+          <div style="font-size:12px; color:var(--ink-soft); text-transform:uppercase;">${escapeHtml(item.category)}</div>
+        </div>
+        <div style="background:var(--accent-soft); color:var(--accent); font-weight:bold; padding:4px 10px; border-radius:12px; font-size:13px;">
+          Qty: ${item.quantity}
+        </div>
+      </div>
+    `).join('');
+
+    const modalHTML = `
+      <div class="modal-header">
+        <h3 style="margin:0; font-family:var(--font-display);">${req.status === 'returning' ? 'Confirm Return' : 'Review Borrow Request'}</h3>
+        <button class="close-btn" type="button" onclick="closeModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px; font-size:14px;">
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;">Borrowing School</div>
+          <div style="font-weight:600; color:var(--ink); font-size:16px;">${escapeHtml(req.requesterSchool)}</div>
+          <div style="color:var(--ink-soft); font-size:13px; margin-bottom:8px;">Located in ${escapeHtml(req.requesterTown)} (${escapeHtml(req.requesterEmail)})</div>
+          ${teacherContact}
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;">Date Duration</div>
+          <div style="color:var(--ink); font-weight:500;">${formattedDates}</div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;">Location Preference</div>
+          <div style="color:var(--ink); font-weight:500;">${locationLabel}</div>
+        </div>
+        <div>
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;">Requested Items</div>
+          <div style="display:flex; flex-direction:column; background:var(--surface-2); padding:0 16px; border-radius:var(--radius); border:1px solid var(--border); max-height:450px; overflow-y:auto;">
+            ${itemsHTML}
+          </div>
+        </div>
+        <div id="disapprovalForm" style="display:none; flex-direction:column; gap:6px; margin-top:8px;">
+          <label for="disapprovalReasonInput" style="font-size:12px; font-weight:600; color:var(--danger);">Reason for Disapproval</label>
+          <textarea id="disapprovalReasonInput" placeholder="State why the request is disapproved (e.g. equipment is currently in use)..." rows="3" style="width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; font-family:inherit; font-size:13px; resize:none;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" id="reviewModalActions">
+        ${req.status === 'returning' ? `
+          <button class="btn btn-ghost" type="button" onclick="closeModal()">Cancel</button>
+          <button class="btn" type="button" style="background:#2D6A4F; color:white; border:none;" onclick="confirmReturnReceived('${req.id}')">Confirm Return Received</button>
+        ` : `
+          <button class="btn btn-ghost" type="button" onclick="closeModal()">Cancel</button>
+          <button class="btn danger" type="button" onclick="showDisapprovalReasonInput('${req.id}')">Disapprove</button>
+          <button class="btn" type="button" style="background:#2D6A4F; color:white; border:none;" onclick="approveBorrowRequest('${req.id}')">Approve Request</button>
+        `}
+      </div>
+    `;
+
+    document.getElementById('modal').innerHTML = modalHTML;
+    document.getElementById('modalOverlay').hidden = false;
+  };
+
+  window.showDisapprovalReasonInput = function(reqId) {
+    document.getElementById('disapprovalForm').style.display = 'flex';
+    document.getElementById('disapprovalReasonInput').focus();
+    
+    document.getElementById('reviewModalActions').innerHTML = `
+      <button class="btn btn-ghost" type="button" onclick="openRequestReviewModal('${reqId}')">Back</button>
+      <button class="btn danger" type="button" onclick="disapproveBorrowRequest('${reqId}')">Confirm Disapprove</button>
+    `;
+  };
+
+  window.approveBorrowRequest = async function(reqId) {
+    try {
+      if (!databases) return;
+      await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, reqId, {
+        status: 'approved',
+        reviewedAt: new Date().toISOString()
+      });
+      const req = incomingRequests.find(r => r.id === reqId);
+      if (req) {
+        // Increment borrowed quantity in school's inventory
+        if (req.items) {
+          req.items.forEach(reqItem => {
+            const invItem = items.find(i => i.id === reqItem.itemId);
+            if (invItem) {
+              invItem.borrowedQty = (invItem.borrowedQty || 0) + Number(reqItem.quantity || 0);
+            }
+          });
+          await saveItems();
+        }
+
+        if (req.requesterEmail && typeof sendFCMNotification === 'function') {
+          sendFCMNotification(
+            req.requesterEmail,
+            "Borrow Request Approved",
+            `Your request for ${req.itemName || 'equipment'} was approved.`,
+            "approvals"
+          );
+        }
+      }
+      closeModal();
+      alert("Borrow request approved successfully!");
+      if (typeof fetchApprovals === 'function') fetchApprovals();
+    } catch(e) {
+      console.error("Error approving request:", e);
+      alert("Error approving request: " + e.message);
+    }
+  };
+
+  window.disapproveBorrowRequest = async function(reqId) {
+    const reason = document.getElementById('disapprovalReasonInput').value.trim();
+    if (!reason) {
+      alert("Please provide a reason for disapproval.");
+      return;
+    }
+
+    try {
+      if (!databases) return;
+      await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, reqId, {
+        status: 'disapproved',
+        disapprovalReason: reason,
+        reviewedAt: new Date().toISOString()
+      });
+      const req = incomingRequests.find(r => r.id === reqId);
+      if (req && req.requesterEmail && typeof sendFCMNotification === 'function') {
+        sendFCMNotification(
+          req.requesterEmail,
+          "Borrow Request Disapproved",
+          `Your request for ${req.itemName || 'equipment'} was disapproved. Reason: ${reason}`,
+          "approvals"
+        );
+      }
+      closeModal();
+      alert("Borrow request disapproved.");
+      if (typeof fetchApprovals === 'function') fetchApprovals();
+    } catch(e) {
+      console.error("Error disapproving request:", e);
+      alert("Error disapproving request: " + e.message);
+    }
+  };
+
+  window.confirmReturnReceived = async function(reqId) {
+    if (!confirm("Are you sure you want to confirm that all items for this request have been returned?")) return;
+    
+    try {
+      if (!databases) return;
+      
+      const req = incomingRequests.find(r => r.id === reqId);
+      if (!req) return;
+
+      await databases.updateDocument(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, reqId, {
+        status: 'returned',
+        returnedAt: new Date().toISOString()
+      });
+
+      // Decrement borrowed quantity in school's inventory (Automatic Restoration)
+      if (req.items) {
+        req.items.forEach(reqItem => {
+          const invItem = items.find(i => i.id === reqItem.itemId);
+          if (invItem) {
+            invItem.borrowedQty = Math.max(0, (invItem.borrowedQty || 0) - Number(reqItem.quantity || 0));
+          }
+        });
+        await saveItems();
+      }
+
+      // Send notification to the Borrower (Community App)
+      if (req.requesterEmail && typeof sendFCMNotification === 'function') {
+        sendFCMNotification(
+          req.requesterEmail,
+          "Return Confirmed",
+          `${appSettings.schoolName} has confirmed that the borrowed items have been successfully returned.`,
+          "approvals"
+        );
+      }
+
+      closeModal();
+      alert("Return confirmed successfully!");
+      if (typeof fetchApprovals === 'function') fetchApprovals();
+    } catch(e) {
+      console.error("Error confirming return:", e);
+      alert("Error confirming return: " + e.message);
+    }
+  };
+
+/* =====================================================
+   INIT
+===================================================== */
+  async function checkOverdueReturns() {
+    if (!databases || !appSettings.schoolName) return;
+    
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    try {
+      const snap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REQUESTS, [
+        Query.equal('targetSchool', appSettings.schoolName),
+        Query.equal('status', 'approved')
+      ]);
+        
+      snap.documents.forEach(req => {
+        if (req.endDate && req.endDate < todayStr) {
+          window.showToast(
+            "Overdue Equipment Return",
+            `${req.requesterSchool} has not returned equipment that was due on ${req.endDate}.`
+          );
+
+          if (typeof window.Capacitor !== 'undefined' && window.Capacitor.isPluginAvailable && window.Capacitor.isPluginAvailable('LocalNotifications')) {
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+              notifications: [{
+                title: "Equipment Return Overdue",
+                body: `${req.requesterSchool} is overdue for returning equipment (Due: ${req.endDate}).`,
+                id: Math.floor(Math.random() * 100000),
+                schedule: { at: new Date(Date.now() + 1000) }
+              }]
+            });
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Error checking overdue returns:", err);
+    }
+  }
+
+  async function startRevocationListener(email) {
+    if (!client || !email) return;
+    if (window.revokeListener) { window.revokeListener(); window.revokeListener = null; }
+    window.revokeListener = client.subscribe(`databases.${appwriteCfg.DATABASE_ID}.collections.${appwriteCfg.COLLECTIONS.REVOKED}.documents`, response => {
+      if (response.payload && response.payload.email === email) {
+        alert("Access Denied: This school account has been removed by the Science Coordinator.");
+        appSettings.isAuthenticated = false;
+        localStorage.removeItem('stem_settings');
+        currentView = 'login';
+        render();
+      }
+    });
+  }
+
+async function init(){
+  try {
+    if (appSettings.isAuthenticated && appSettings.email) {
+      if (databases) {
+        try {
+          const revSnap = await databases.listDocuments(appwriteCfg.DATABASE_ID, appwriteCfg.COLLECTIONS.REVOKED, [Query.equal('email', appSettings.email)]);
+          if (revSnap.documents.length > 0) {
+            alert("Access Denied: This school account has been removed by the Science Coordinator.");
+            appSettings.isAuthenticated = false;
+            localStorage.removeItem('stem_settings');
+            currentView = 'login';
+            render();
+            return;
+          }
+        } catch(e) {
+          console.error("Revocation check error:", e);
+        }
+      }
+
+      startRevocationListener(appSettings.email);
+      startInventoryListener();
+      startChatListener();
+      startApprovalsListener();
+      checkOverdueReturns();
+      if (currentView === 'login') {
+        currentView = 'dashboard';
+      }
+    } else {
+      currentView = 'login';
+    }
+
+    await loadItems();
+  setupGlobalListeners();
+  setupPushNotifications();
+  if (appSettings.isAuthenticated) {
+    if (window.fcmTokenValue) {
+      saveFCMTokenToDatabase(window.fcmTokenValue);
+    }
+    startInventoryListener();
+    startChatListener();
+    startApprovalsListener();
+  }
+
+  let pct = 0;
+  const pctEl = document.getElementById('splashPercent');
+  const iv = setInterval(() => {
+    pct += 2;
+    if (pctEl) pctEl.style.width = Math.min(pct, 100) + '%';
+    if (pct >= 100) {
+      clearInterval(iv);
+      const splash = document.getElementById('splashScreen');
+      if (splash) {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.remove(), 500);
+      }
+    }
+  }, 100);
+  } catch(e) { alert("Error: " + e.message); console.error(e); }
+}
+
+  // Swipe to change tabs
+  (function() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    const views = ['dashboard', 'inventory', 'chat', 'approvals', 'settings'];
+
+    document.addEventListener('touchstart', e => {
+      if (currentView === 'login') return;
+      
+      const itemModal = document.getElementById('itemModal');
+      const detailModal = document.getElementById('detailModal');
+      if (itemModal && itemModal.style.display === 'flex') return;
+      if (detailModal && detailModal.style.display === 'flex') return;
+      if (document.getElementById('convoOverlay') && document.getElementById('convoOverlay').classList.contains('open')) return;
+      if (document.getElementById('nmOverlay') && document.getElementById('nmOverlay').classList.contains('show')) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+      if (currentView === 'login') return;
+      const itemModal = document.getElementById('itemModal');
+      const detailModal = document.getElementById('detailModal');
+      if (itemModal && itemModal.style.display === 'flex') return;
+      if (detailModal && detailModal.style.display === 'flex') return;
+      if (document.getElementById('convoOverlay') && document.getElementById('convoOverlay').classList.contains('open')) return;
+      if (document.getElementById('nmOverlay') && document.getElementById('nmOverlay').classList.contains('show')) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > 60 && Math.abs(diffY) < 40) {
+        const currentIndex = views.indexOf(currentView);
+        if (currentIndex === -1) return;
+
+        if (diffX < 0) {
+          if (currentIndex < views.length - 1) {
+            currentView = views[currentIndex + 1];
+            render();
+          }
+        } else {
+          if (currentIndex > 0) {
+            currentView = views[currentIndex - 1];
+            render();
+          }
+        }
+      }
+    }
+  })();
+
+  init();
+
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
