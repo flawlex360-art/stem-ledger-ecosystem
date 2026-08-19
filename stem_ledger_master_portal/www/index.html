@@ -425,14 +425,16 @@ tbody tr:hover { background: #F8FAFC; }
 
 .badge-icon { position: absolute; top: 0px; right: 8px; background: var(--danger); color: white; font-size: 9px; font-weight: bold; border-radius: 10px; padding: 2px 5px; min-width: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 .toast-notification {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
   background: var(--surface); color: var(--ink);
   padding: 12px 20px; border-radius: var(--radius-md);
   box-shadow: var(--shadow-hover); border: 1px solid var(--border);
   font-size: 13px; font-weight: 600; z-index: 10000;
-  animation: premiumEntrance 0.3s ease;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex; gap: 10px; align-items: center; min-width: 250px; max-width: 90vw;
 }
-.toast-notification.show { top: 20px; }
+.toast-notification.show { top: 20px; opacity: 1; pointer-events: auto; }
 
 /* Splash Screen */
 .page-fade-in {

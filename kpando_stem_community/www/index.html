@@ -177,14 +177,16 @@ body {
 
   /* ---------- Toast notification ---------- */
   .toast-notification {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
   background: var(--surface); color: var(--ink);
   padding: 12px 20px; border-radius: var(--radius-md);
   box-shadow: var(--shadow-hover); border: 1px solid var(--border);
   font-size: 13px; font-weight: 600; z-index: 10000;
-  animation: premiumEntrance 0.3s ease;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex; gap: 10px; align-items: center; min-width: 250px; max-width: 90vw;
 }
-  .toast-notification.show { top: 20px; }
+  .toast-notification.show { top: 20px; opacity: 1; pointer-events: auto; }
   .modal-overlay, .sidebar-wrapper, .bottom-nav-bar, .sheet-overlay, .overlay-sheet {
     transform: translate3d(0,0,0);
     backface-visibility: hidden;
