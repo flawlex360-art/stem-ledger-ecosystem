@@ -3,7 +3,7 @@
   "appName": "Kpando STEM Community",
   "webDir": "www",
   "server": {
-    "url": "https://kpando-stem-ledger.vercel.app/community/",
+    "url": "https://stem-ledger-ecosystem.vercel.app/community/",
     "cleartext": true
   }
 }

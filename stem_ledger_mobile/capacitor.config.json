@@ -3,7 +3,7 @@
   "appName": "STEM Ledger",
   "webDir": "www",
   "server": {
-    "url": "https://kpando-stem-ledger.vercel.app/school/",
+    "url": "https://stem-ledger-ecosystem.vercel.app/school/",
     "cleartext": true
   }
 }

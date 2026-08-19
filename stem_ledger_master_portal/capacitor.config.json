@@ -3,7 +3,7 @@
   "appName": "STEM Master Portal",
   "webDir": "www",
   "server": {
-    "url": "https://kpando-stem-ledger.vercel.app/master/",
+    "url": "https://stem-ledger-ecosystem.vercel.app/master/",
     "cleartext": true
   }
 }
