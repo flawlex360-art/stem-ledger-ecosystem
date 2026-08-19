@@ -1198,64 +1198,118 @@ tbody tr:hover { background: #F8FAFC; }
     `;
   }
 
-  // ==========================================
-  // DRILLDOWN MODAL
+    // ==========================================
+  // DRILLDOWN & BREAKDOWN MODALS
   // ==========================================
   window.openDrilldown = function() {
-    let rows = '';
+    let container = document.getElementById('drilldownBody');
+    if (!container) return;
+
     if (districtBrokenLostItems.length === 0) {
-      rows = `<tr><td colspan="6" style="text-align:center; color:var(--ink-soft); padding:32px;">No broken or lost items in the entire district!</td></tr>`;
+      container.innerHTML = '<div style="text-align:center; color:var(--ink-soft); padding:36px; background:var(--surface-subtle); border-radius:12px;">' +
+        '<div style="font-size:24px; margin-bottom:8px;">✅</div>' +
+        '<div style="font-weight:700; color:var(--ink); font-size:15px;">All Equipment Intact</div>' +
+        '<div style="font-size:12px; margin-top:4px;">No broken or lost items reported across all district schools.</div>' +
+      '</div>';
     } else {
-      districtBrokenLostItems.sort((a,b) => a.schoolName.localeCompare(b.schoolName)).forEach(i => {
-        rows += `
-          <tr>
-            <td style="font-weight:600; color:var(--accent);">${escapeHtml(i.schoolName)}</td>
-            <td style="font-weight:500;">${escapeHtml(i.name || 'Unknown Item')}</td>
-            <td style="font-family:var(--font-mono); font-size:12px;">${escapeHtml(i.assetTag || 'N/A')}</td>
-            <td><span class="badge bad">${escapeHtml(i.displayStatus)}</span></td>
-            <td style="font-family:var(--font-mono);">${i.blQuantity}</td>
-            <td>${fmtMoney(Number(i.blQuantity)*Number(i.cost||0))}</td>
-          </tr>
-        `;
-      });
+      let cards = districtBrokenLostItems.sort((a,b) => a.schoolName.localeCompare(b.schoolName)).map(i => {
+        const itemCost = Number(i.blQuantity) * Number(i.cost || 0);
+        return '<div style="background:var(--surface-subtle); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; gap:12px;">' +
+          '<div style="flex:1; min-width:0;">' +
+            '<div style="font-size:11px; font-weight:700; color:var(--primary-600); text-transform:uppercase; letter-spacing:0.04em;">' + escapeHtml(i.schoolName) + '</div>' +
+            '<div style="font-weight:700; font-size:14px; color:var(--ink); margin-top:2px;">' + escapeHtml(i.name || 'Unknown Item') + '</div>' +
+            '<div style="font-size:11.5px; color:var(--ink-soft); margin-top:2px; font-family:var(--font-mono);">Tag: ' + escapeHtml(i.assetTag || 'N/A') + '</div>' +
+          '</div>' +
+          '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">' +
+            '<span class="badge bad">' + escapeHtml(i.displayStatus) + ' (' + i.blQuantity + ')</span>' +
+            '<span style="font-family:var(--font-mono); font-weight:700; font-size:13px; color:var(--ink);">' + (itemCost > 0 ? fmtMoney(itemCost) : 'Val: N/A') + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      container.innerHTML = cards;
     }
-    document.getElementById('drilldownBody').innerHTML = rows;
     document.getElementById('drilldownModal').hidden = false;
   };
 
   window.openValueBreakdown = function() {
-    let rows = '';
-    if (schoolsData.length === 0) {
-      rows = `<tr><td colspan="3" style="text-align:center; color:var(--ink-soft); padding:32px;">No registered schools found!</td></tr>`;
-    } else {
-      [...schoolsData].sort((a,b) => b.value - a.value).forEach(s => {
-        rows += `
-          <tr>
-            <td style="font-weight:600; color:var(--accent); width:50%; padding:10px 8px; word-break:break-word; white-space:normal;">${escapeHtml(s.name)}</td>
-            <td style="font-family:var(--font-mono); font-weight:500; width:22%; padding:10px 8px; text-align:right;">${s.qty.toLocaleString()}</td>
-            <td style="color:#1F5C40; font-weight:600; font-family:var(--font-mono); width:28%; padding:10px 8px; text-align:right;">${fmtMoney(s.value)}</td>
-          </tr>
-        `;
-      });
+    const container = document.getElementById('valueBreakdownBody');
+    const summaryContainer = document.getElementById('valueBreakdownSummary');
+    if (!container) return;
+
+    let totalVal = schoolsData.reduce((s, d) => s + d.value, 0);
+    let totalQty = schoolsData.reduce((s, d) => s + d.qty, 0);
+
+    if (summaryContainer) {
+      summaryContainer.innerHTML = '<div style="background:var(--primary-soft); border:1px solid rgba(37,99,235,0.2); border-radius:12px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">' +
+        '<div>' +
+          '<div style="font-size:11px; font-weight:700; color:var(--primary-600); text-transform:uppercase;">Total Municipal Valuation</div>' +
+          '<div style="font-size:22px; font-weight:800; color:var(--primary); font-family:var(--font-mono);">' + fmtMoney(totalVal) + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<div style="font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase;">Total Inventory</div>' +
+          '<div style="font-size:18px; font-weight:800; color:var(--ink); font-family:var(--font-mono);">' + totalQty.toLocaleString() + ' <span style="font-size:12px; font-weight:600; color:var(--ink-soft);">Units</span></div>' +
+        '</div>' +
+      '</div>';
     }
-    document.getElementById('valueBreakdownBody').innerHTML = rows;
+
+    if (schoolsData.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:var(--ink-soft); padding:32px;">No registered schools found.</div>';
+    } else {
+      let cards = [...schoolsData].sort((a,b) => b.value - a.value).map(s => {
+        const type = (s.type || 'stem').toLowerCase();
+        const isCommunity = type === 'community';
+        const initials = s.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SC';
+        const pct = totalVal > 0 ? ((s.value / totalVal) * 100).toFixed(1) : '0.0';
+
+        return '<div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow-sm);">' +
+          '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">' +
+            '<div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">' +
+              '<div class="school-avatar ' + (isCommunity ? 'community' : '') + '" style="width:34px; height:34px; font-size:12px;">' + initials + '</div>' +
+              '<div style="min-width:0;">' +
+                '<div style="font-weight:700; font-size:13.5px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escapeHtml(s.name) + '</div>' +
+                '<div style="font-size:11px; color:var(--ink-soft);">' + (isCommunity ? 'Community Borrower' : 'STEM Institution') + ' &middot; ' + s.qty.toLocaleString() + ' Items</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:right; flex-shrink:0;">' +
+              '<div style="font-family:var(--font-mono); font-weight:800; font-size:14px; color:#047857;">' + fmtMoney(s.value) + '</div>' +
+              '<span class="badge ' + (Number(pct) > 0 ? 'good' : 'warn') + '" style="font-size:10px; padding:1px 6px; margin-top:2px;">' + pct + '% share</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="width:100%; height:5px; background:var(--surface-subtle); border-radius:4px; overflow:hidden; margin-top:10px;">' +
+            '<div style="width:' + pct + '%; height:100%; background:linear-gradient(90deg, #1E3A8A 0%, #2563EB 100%); border-radius:4px;"></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      container.innerHTML = cards;
+    }
     document.getElementById('valueBreakdownModal').hidden = false;
   };
 
   window.openActiveSchoolsList = function() {
-    let rows = '';
+    const container = document.getElementById('activeSchoolsBody');
+    if (!container) return;
+
     if (schoolsData.length === 0) {
-      rows = `<tr><td style="text-align:center; color:var(--ink-soft); padding:32px;">No active schools registered.</td></tr>`;
+      container.innerHTML = '<div style="text-align:center; color:var(--ink-soft); padding:32px;">No active schools registered.</div>';
     } else {
-      [...schoolsData].forEach((s, idx) => {
-        rows += `
-          <tr>
-            <td style="font-weight:600; color:var(--accent); width:100%; padding:12px 8px; word-break:break-word; white-space:normal;">${idx + 1}. ${escapeHtml(s.name)}</td>
-          </tr>
-        `;
-      });
+      let cards = [...schoolsData].map((s, idx) => {
+        const type = (s.type || 'stem').toLowerCase();
+        const isCommunity = type === 'community';
+        const initials = s.name.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SC';
+
+        return '<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">' +
+          '<div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">' +
+            '<div class="school-avatar ' + (isCommunity ? 'community' : '') + '" style="width:32px; height:32px; font-size:11px;">' + initials + '</div>' +
+            '<div style="min-width:0;">' +
+              '<div style="font-weight:700; font-size:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escapeHtml(s.name) + '</div>' +
+              '<div style="font-size:11px; color:var(--ink-soft);">' + escapeHtml(s.email) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="badge ' + (isCommunity ? 'type-comm' : 'type-stem') + '">' + (isCommunity ? 'Community' : 'STEM Hub') + '</span>' +
+        '</div>';
+      }).join('');
+      container.innerHTML = cards;
     }
-    document.getElementById('activeSchoolsBody').innerHTML = rows;
     document.getElementById('activeSchoolsModal').hidden = false;
   };
 
