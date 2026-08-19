@@ -458,25 +458,13 @@ tbody tr:hover { background: #F8FAFC; }
 
 <!-- Broken/Lost items overview modal -->
 <div class="glass-overlay" id="drilldownModal" hidden>
-  <div class="glass-modal">
+  <div class="glass-modal" style="max-width:550px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:var(--danger);">Broken / Lost Items Overview</h2>
       <button class="close-btn" onclick="document.getElementById('drilldownModal').hidden=true;">&times;</button>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>School</th>
-            <th>Item Name</th>
-            <th>Asset Tag</th>
-            <th>Status</th>
-            <th>Qty</th>
-            <th>Cost</th>
-          </tr>
-        </thead>
-        <tbody id="drilldownBody"></tbody>
-      </table>
+    <div style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding-right:4px;" id="drilldownBody">
+      <!-- Rendered dynamically -->
     </div>
   </div>
 </div>
@@ -496,22 +484,14 @@ tbody tr:hover { background: #F8FAFC; }
 
 <!-- District Total Value Breakdown Modal -->
 <div class="glass-overlay" id="valueBreakdownModal" hidden>
-  <div class="glass-modal">
+  <div class="glass-modal" style="max-width:550px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:#7B1FA2;">District Total Value Breakdown</h2>
       <button class="close-btn" onclick="document.getElementById('valueBreakdownModal').hidden=true;">&times;</button>
     </div>
-    <div class="table-wrap">
-      <table style="width:100%; table-layout:fixed;">
-        <thead>
-          <tr>
-            <th style="width:50%; padding:10px 8px;">School</th>
-            <th style="width:22%; padding:10px 8px; text-align:right;">Total Assets</th>
-            <th style="width:28%; padding:10px 8px; text-align:right;">Estimated Value</th>
-          </tr>
-        </thead>
-        <tbody id="valueBreakdownBody"></tbody>
-      </table>
+    <div id="valueBreakdownSummary" style="margin-bottom:16px;"></div>
+    <div style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding-right:4px;" id="valueBreakdownBody">
+      <!-- Rendered dynamically -->
     </div>
   </div>
 </div>
@@ -523,15 +503,8 @@ tbody tr:hover { background: #F8FAFC; }
       <h2 style="margin:0; font-family:var(--font-display); font-size:20px; color:var(--accent);">Active Registered Schools</h2>
       <button class="close-btn" onclick="document.getElementById('activeSchoolsModal').hidden=true;">&times;</button>
     </div>
-    <div class="table-wrap">
-      <table style="width:100%; table-layout:fixed;">
-        <thead>
-          <tr>
-            <th style="width:100%; padding:12px 8px;">School Name</th>
-          </tr>
-        </thead>
-        <tbody id="activeSchoolsBody"></tbody>
-      </table>
+    <div style="display:flex; flex-direction:column; gap:12px; max-height:60vh; overflow-y:auto; padding-right:4px;" id="activeSchoolsBody">
+      <!-- Rendered dynamically -->
     </div>
   </div>
 </div>
